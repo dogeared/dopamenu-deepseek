@@ -1,5 +1,9 @@
 # Dopa Menu
 
+[![Version](https://img.shields.io/github/v/tag/dogeared/dopamenu-deepseek?label=version&sort=semver)](https://github.com/dogeared/dopamenu-deepseek/tags)
+[![Build](https://github.com/dogeared/dopamenu-deepseek/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/dogeared/dopamenu-deepseek/actions/workflows/ci.yml)
+[![Coverage](https://raw.githubusercontent.com/dogeared/dopamenu-deepseek/badges/jacoco.svg)](https://github.com/dogeared/dopamenu-deepseek/actions/workflows/ci.yml)
+
 A small, opinionated web app for building and using a **dopa-menu**: a menu of intentional
 dopamine sources organised into courses.
 
@@ -159,7 +163,7 @@ mvn spring-boot:run      # dev mode with hot reload
 mvn -Pproduction package # production build (Vaadin frontend bundle)
 ```
 
-The production build writes `target/dopamenu-0.1.0-SNAPSHOT.jar`; the Dockerfile uses it in a
+The production build writes `target/dopamenu-0.0.1.jar`; the Dockerfile uses it in a
 multi-stage build.
 
 ### Project layout
