@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.2] - 2026-10-27
+
 ### Fixed
 
 - Prevent the push and merged-pull-request workflow runs from cancelling each
@@ -29,5 +31,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Set the project version to `0.0.1`.
 
-[Unreleased]: https://github.com/dogeared/dopamenu-deepseek/compare/v0.0.1...HEAD
+[Unreleased]: https://github.com/dogeared/dopamenu-deepseek/compare/v0.0.2...HEAD
+[0.0.2]: https://github.com/dogeared/dopamenu-deepseek/releases/tag/v0.0.2
 [0.0.1]: https://github.com/dogeared/dopamenu-deepseek/releases/tag/v0.0.1

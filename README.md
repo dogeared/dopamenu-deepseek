@@ -163,7 +163,7 @@ mvn spring-boot:run      # dev mode with hot reload
 mvn -Pproduction package # production build (Vaadin frontend bundle)
 ```
 
-The production build writes `target/dopamenu-0.0.1.jar`; the Dockerfile uses it in a
+The production build writes `target/dopamenu-0.0.2.jar`; the Dockerfile uses it in a
 multi-stage build.
 
 ### Project layout
