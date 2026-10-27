@@ -13,7 +13,7 @@
 
     <groupId>com.example</groupId>
     <artifactId>dopamenu</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <name>dopamenu</name>
     <description>A Dopa-Menu for intentional dopamine</description>
 
@@ -112,6 +112,15 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <!-- Framework wiring and the application bootstrap have no
+                             behaviour of their own to unit test. -->
+                        <exclude>com/example/dopamenu/config/SecurityConfig*</exclude>
+                        <exclude>com/example/dopamenu/AppShell*</exclude>
+                        <exclude>com/example/dopamenu/DopaMenuApplication*</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -124,6 +133,26 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                    </execution>
+                    <execution>
+                        <id>check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.90</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

@@ -158,12 +158,18 @@ See `.env.example`. Docker Compose reads `.env` automatically.
 ## Development
 
 ```bash
-mvn test                 # unit tests
+mvn test                 # unit tests + coverage report
+mvn verify               # unit tests + 90% line-coverage gate
 mvn spring-boot:run      # dev mode with hot reload
 mvn -Pproduction package # production build (Vaadin frontend bundle)
 ```
 
-The production build writes `target/dopamenu-0.0.2.jar`; the Dockerfile uses it in a
+The JaCoCo HTML report is written to `target/site/jacoco/index.html`. Only
+framework wiring (`SecurityConfig`, `AppShell`, `DopaMenuApplication`) is excluded
+from the coverage gate; domain, service, configuration, and the Vaadin UI
+components are all measured.
+
+The production build writes `target/dopamenu-0.0.3.jar`; the Dockerfile uses it in a
 multi-stage build.
 
 ### Project layout

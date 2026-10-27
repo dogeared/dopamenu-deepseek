@@ -38,12 +38,12 @@ public class OrderDialog extends Dialog {
     private final CurrentUser currentUser;
     private final Runnable onChanged;
 
-    private final String title;
-    private final Course course;
-    private final int plannedMinutes;
     private final UUID itemId;
     private final int moodBeforeDefault;
 
+    private String title;
+    private Course course;
+    private int plannedMinutes;
     private MenuOrder order;
     private Phase phase = Phase.BEFORE;
     private int extraMinutes;
@@ -134,6 +134,9 @@ public class OrderDialog extends Dialog {
                 order = orderService.start(currentUser.id(), itemId, mood.getValue());
             } catch (MenuOrderService.ActiveOrderException alreadyRunning) {
                 order = alreadyRunning.getOrder();
+                title = order.getItemTitle();
+                course = order.getCourse();
+                plannedMinutes = Math.max(1, order.getPlannedMinutes());
                 Notification.show("You already had something running — picking it back up.");
             }
             onChanged.run();

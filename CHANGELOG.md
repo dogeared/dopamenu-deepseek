@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.3] - 2026-10-27
+
+### Added
+
+- Unit tests for the domain model, services, current-user resolution, and
+  Keycloak configuration.
+- UI tests that drive the Vaadin component tree: menu, history, manage-menu,
+  order flow, form validation, layout, mood picker, cards, and course sections.
+- Line coverage now exceeds 99% of measured code.
+
+### Changed
+
+- Enforce a 90% line-coverage gate in the build. Only framework wiring
+  (`SecurityConfig`, `AppShell`, `DopaMenuApplication`) is excluded from the
+  coverage report.
+
+### Fixed
+
+- Resuming an already-running order now shows that order's title and course
+  instead of the item the user tried to start.
+
 ## [0.0.2] - 2026-10-27
 
 ### Fixed
@@ -31,6 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Set the project version to `0.0.1`.
 
-[Unreleased]: https://github.com/dogeared/dopamenu-deepseek/compare/v0.0.2...HEAD
+[Unreleased]: https://github.com/dogeared/dopamenu-deepseek/compare/v0.0.3...HEAD
+[0.0.3]: https://github.com/dogeared/dopamenu-deepseek/releases/tag/v0.0.3
 [0.0.2]: https://github.com/dogeared/dopamenu-deepseek/releases/tag/v0.0.2
 [0.0.1]: https://github.com/dogeared/dopamenu-deepseek/releases/tag/v0.0.1
