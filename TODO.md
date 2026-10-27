@@ -5,6 +5,8 @@
 - [ ] **feature:** CRUD operations for menu sections
 - [ ] **feature:** create printable dopa-menu from current configuration
 - [ ] **feature:** share read-only menu via unique share link
+- [ ] **feature:** integrate with Paddle for paid subscriptions
+- [ ] **feature:** distinguish which capabilities are free and which are paid
 
 ## Bug fixes
 
