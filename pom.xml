@@ -13,7 +13,7 @@
 
     <groupId>com.example</groupId>
     <artifactId>dopamenu</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <name>dopamenu</name>
     <description>A Dopa-Menu for intentional dopamine</description>
 
@@ -114,9 +114,6 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <configuration>
                     <excludes>
-                        <!-- Vaadin views and components are presentation-only and are
-                             exercised through the UI rather than unit tests. -->
-                        <exclude>com/example/dopamenu/ui/**</exclude>
                         <!-- Framework wiring and the application bootstrap have no
                              behaviour of their own to unit test. -->
                         <exclude>com/example/dopamenu/config/SecurityConfig*</exclude>
