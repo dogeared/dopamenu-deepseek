@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-27
+
+### Added
+
+- Keycloak login theme (`keycloak/themes/dopamenu`) that matches the app's
+  look: wordmark, colours, fonts, inputs and pill buttons. It extends
+  `keycloak.v2` and is mounted into the dev Keycloak container.
+
 ## [0.1.0] - 2026-10-27
 
 ### Added
@@ -73,7 +81,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Set the project version to `0.0.1`.
 
-[Unreleased]: https://github.com/dogeared/dopamenu-deepseek/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/dogeared/dopamenu-deepseek/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/dogeared/dopamenu-deepseek/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/dogeared/dopamenu-deepseek/releases/tag/v0.1.0
 [0.0.3]: https://github.com/dogeared/dopamenu-deepseek/releases/tag/v0.0.3
 [0.0.2]: https://github.com/dogeared/dopamenu-deepseek/releases/tag/v0.0.2

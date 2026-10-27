@@ -20,3 +20,4 @@ services:
       - "${KEYCLOAK_PORT:-8180}:8080"
     volumes:
       - ./keycloak/realm-dopamenu.json:/opt/keycloak/data/import/realm-dopamenu.json:ro
+      - ./keycloak/themes/dopamenu:/opt/keycloak/themes/dopamenu:ro
