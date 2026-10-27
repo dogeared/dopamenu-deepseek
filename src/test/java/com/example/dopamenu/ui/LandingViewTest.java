@@ -61,8 +61,17 @@ class LandingViewTest {
 
         assertThat(hasText(view, "How to ADHD")).isTrue();
         assertThat(hasText(view, "Jessica McCabe")).isTrue();
+        assertThat(hasText(view, "Eric Tivers")).isTrue();
+        assertThat(hasText(view, "ADHD reWired")).isTrue();
         assertThat(hasText(view, "Thank you")).isTrue();
         assertThat(hasText(view, "Where the idea comes from")).isTrue();
+
+        Anchor eric = findAll(view, Anchor.class).stream()
+                .filter(anchor -> "Eric Tivers".equals(anchor.getText()))
+                .findFirst()
+                .orElseThrow();
+        assertThat(eric.getHref()).isEqualTo(LandingView.ERIC_TIVERS_CHANNEL_URL);
+        assertThat(eric.getTarget()).contains("_blank");
     }
 
     @Test

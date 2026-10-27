@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The landing page now also thanks Eric Tivers, with a link to the ADHD reWired
+  YouTube channel.
+
 ## [0.1.1] - 2026-10-27
 
 ### Added
