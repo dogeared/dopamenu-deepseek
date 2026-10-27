@@ -171,7 +171,7 @@ framework wiring (`SecurityConfig`, `AppShell`, `DopaMenuApplication`) is exclud
 from the coverage gate; domain, service, configuration, and the Vaadin UI
 components are all measured.
 
-The production build writes `target/dopamenu-0.0.3.jar`; the Dockerfile uses it in a
+The production build writes `target/dopamenu-0.1.0.jar`; the Dockerfile uses it in a
 multi-stage build.
 
 ### Project layout

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-27
+
 ### Added
 
 - Public landing page at `/` that explains what a dopa-menu is, links to the
@@ -66,7 +68,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Set the project version to `0.0.1`.
 
-[Unreleased]: https://github.com/dogeared/dopamenu-deepseek/compare/v0.0.3...HEAD
+[Unreleased]: https://github.com/dogeared/dopamenu-deepseek/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/dogeared/dopamenu-deepseek/releases/tag/v0.1.0
 [0.0.3]: https://github.com/dogeared/dopamenu-deepseek/releases/tag/v0.0.3
 [0.0.2]: https://github.com/dogeared/dopamenu-deepseek/releases/tag/v0.0.2
 [0.0.1]: https://github.com/dogeared/dopamenu-deepseek/releases/tag/v0.0.1
