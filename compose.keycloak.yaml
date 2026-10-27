@@ -1,0 +1,22 @@
+name: dopamenu
+
+# Optional development Keycloak. Use this if you do not already have a local
+# Keycloak instance. Start it with:
+#   docker compose -f compose.keycloak.yaml up -d
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.1
+    container_name: dopamenu-keycloak
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      # The browser-facing hostname. The app reaches Keycloak over the
+      # published host port (host.docker.internal:8180) for back-channel calls.
+      KC_HOSTNAME: ${KEYCLOAK_PUBLIC_URL:-http://localhost:8180}
+      KC_HTTP_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "${KEYCLOAK_PORT:-8180}:8080"
+    volumes:
+      - ./keycloak/realm-dopamenu.json:/opt/keycloak/data/import/realm-dopamenu.json:ro

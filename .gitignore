@@ -1,0 +1,11 @@
+target/
+*.class
+*.jar
+node_modules/
+src/main/frontend/generated/
+src/main/frontend/generated-flow-imports.*
+.idea/
+*.iml
+.vscode/
+.DS_Store
+.env
