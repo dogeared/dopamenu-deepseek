@@ -63,7 +63,7 @@ public class PublicLayout extends AppLayout {
     private static Component account(CurrentUser currentUser,
             AuthenticationContext authenticationContext) {
         if (!currentUser.isAuthenticated()) {
-            Anchor login = new Anchor("/oauth2/authorization/keycloak", "Log in");
+            Anchor login = new Anchor("/login", "Log in");
             Css.add(login, "btn", "btn-primary", "nav-login");
             login.getElement().setAttribute("aria-label", "Log in with Keycloak");
             return login;

@@ -47,7 +47,7 @@ class PublicLayoutTest {
                 .filter(anchor -> "Log in".equals(anchor.getText()))
                 .findFirst()
                 .orElseThrow();
-        assertThat(login.getHref()).isEqualTo("/oauth2/authorization/keycloak");
+        assertThat(login.getHref()).isEqualTo("/login");
         assertThat(login.getClassNames()).contains("btn", "btn-primary", "nav-login");
     }
 
