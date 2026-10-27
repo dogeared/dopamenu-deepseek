@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Public landing page at `/` that explains what a dopa-menu is, links to the
+  original How to ADHD video, and thanks the author. It stays reachable after
+  signing in and includes a login button for signed-out visitors.
+- A persistent footer on every page: “made with ❤️ by dogeared”, linking to the
+  GitHub repository.
+
+### Changed
+
+- The menu now lives at `/menu`; successful logins land there.
+- `Home` is part of the signed-in navigation, and the brand links to the landing
+  page.
+
 ## [0.0.3] - 2026-10-27
 
 ### Added

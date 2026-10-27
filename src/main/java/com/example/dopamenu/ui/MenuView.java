@@ -9,7 +9,6 @@ import com.example.dopamenu.service.MenuOrderService;
 import com.example.dopamenu.service.OrderStats;
 import com.example.dopamenu.ui.component.CourseSection;
 import com.example.dopamenu.ui.component.OrderDialog;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.NativeButton;
@@ -24,7 +23,7 @@ import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
 
-@Route(value = "", layout = MainLayout.class)
+@Route(value = "menu", layout = MainLayout.class)
 @PageTitle("Dopa Menu")
 @PermitAll
 public class MenuView extends VerticalLayout {
@@ -134,16 +133,8 @@ public class MenuView extends VerticalLayout {
         return banner;
     }
 
-    private static Div footer() {
-        Div footer = new Div();
-        footer.addClassName("view-footer");
-        Span text = new Span("Courses, not chores. ");
-        Anchor source = new Anchor("https://www.youtube.com/watch?v=-6WCkTwW6xg",
-                "The original dopa-menu idea");
-        source.setTarget("_blank");
-        source.addClassName("inline-link");
-        footer.add(text, source);
-        return footer;
+    private static SiteFooter footer() {
+        return new SiteFooter();
     }
 
     private void order(MenuItem item) {

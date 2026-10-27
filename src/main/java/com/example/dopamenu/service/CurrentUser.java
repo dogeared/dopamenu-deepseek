@@ -22,6 +22,10 @@ public class CurrentUser {
                 .orElseThrow(() -> new IllegalStateException("No authenticated user"));
     }
 
+    public boolean isAuthenticated() {
+        return oidcUser().isPresent();
+    }
+
     public String displayName() {
         return oidcUser().map(user -> {
             String fullName = user.getFullName();

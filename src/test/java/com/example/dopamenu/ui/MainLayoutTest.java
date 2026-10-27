@@ -40,6 +40,7 @@ class MainLayoutTest {
 
         assertThat(hasText(layout, "dopa")).isTrue();
         assertThat(hasText(layout, "menu")).isTrue();
+        assertThat(hasText(layout, "Home")).isTrue();
         assertThat(hasText(layout, "Menu")).isTrue();
         assertThat(hasText(layout, "History")).isTrue();
         assertThat(hasText(layout, "Edit menu")).isTrue();

@@ -33,6 +33,14 @@ class CurrentUserTest {
         signedInAs(user("subject-1", "Ada Lovelace", "ada"));
 
         assertThat(currentUser.id()).isEqualTo("subject-1");
+        assertThat(currentUser.isAuthenticated()).isTrue();
+    }
+
+    @Test
+    void isAuthenticatedIsFalseWithoutAnAuthenticatedUser() {
+        when(context.getAuthenticatedUser(OidcUser.class)).thenReturn(Optional.empty());
+
+        assertThat(currentUser.isAuthenticated()).isFalse();
     }
 
     @Test

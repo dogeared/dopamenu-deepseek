@@ -48,6 +48,7 @@ public class ManageMenuView extends VerticalLayout {
                     .filter(item -> item.getCourse() == course)
                     .toList()));
         }
+        add(new SiteFooter());
     }
 
     private Div head() {

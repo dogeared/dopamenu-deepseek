@@ -41,7 +41,7 @@ public class MainLayout extends AppLayout {
 
     private static RouterLink brand() {
         RouterLink brand = new RouterLink();
-        brand.setRoute(MenuView.class);
+        brand.setRoute(LandingView.class);
         brand.addClassName("brand");
         brand.getElement().setAttribute("aria-label", "Dopa Menu — home");
         Span dopa = new Span("dopa");
@@ -55,7 +55,8 @@ public class MainLayout extends AppLayout {
     private static Nav desktopNav() {
         Nav nav = new Nav();
         nav.addClassName("app-nav");
-        nav.add(link("Menu", VaadinIcon.CUTLERY, MenuView.class, "nav-link"),
+        nav.add(link("Home", VaadinIcon.HOME, LandingView.class, "nav-link"),
+                link("Menu", VaadinIcon.CUTLERY, MenuView.class, "nav-link"),
                 link("History", VaadinIcon.CHART, HistoryView.class, "nav-link"),
                 link("Edit menu", VaadinIcon.EDIT, ManageMenuView.class, "nav-link"));
         return nav;
@@ -91,7 +92,8 @@ public class MainLayout extends AppLayout {
 
         Nav nav = new Nav();
         nav.addClassName("drawer-nav");
-        nav.add(link("Menu", VaadinIcon.CUTLERY, MenuView.class, "drawer-link"),
+        nav.add(link("Home", VaadinIcon.HOME, LandingView.class, "drawer-link"),
+                link("Menu", VaadinIcon.CUTLERY, MenuView.class, "drawer-link"),
                 link("History", VaadinIcon.CHART, HistoryView.class, "drawer-link"),
                 link("Edit menu", VaadinIcon.EDIT, ManageMenuView.class, "drawer-link"));
 
