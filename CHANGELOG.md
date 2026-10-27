@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Prevent the push and merged-pull-request workflow runs from cancelling each
+  other, which left the build badge red and the coverage badge unpublished.
+
 ## [0.0.1] - 2026-10-27
 
 ### Added
