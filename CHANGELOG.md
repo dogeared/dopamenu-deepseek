@@ -23,6 +23,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Home` is part of the signed-in navigation, and the brand links to the landing
   page.
 
+### Fixed
+
+- The public login button points at `/login`, which forwards to the Keycloak
+  authorization endpoint instead of producing a missing-route error.
+
 ## [0.0.3] - 2026-10-27
 
 ### Added
