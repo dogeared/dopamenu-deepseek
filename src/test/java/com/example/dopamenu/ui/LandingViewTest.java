@@ -59,6 +59,12 @@ class LandingViewTest {
                 .filteredOn(anchor -> LandingView.ORIGINAL_VIDEO_URL.equals(anchor.getHref()))
                 .allMatch(anchor -> anchor.getTarget().filter("_blank"::equals).isPresent());
 
+        assertThat(findAll(view, Anchor.class))
+                .filteredOn(anchor -> LandingView.CHANNEL_URL.equals(anchor.getHref()))
+                .hasSize(1)
+                .allMatch(anchor -> anchor.getTarget().filter("_blank"::equals).isPresent())
+                .allMatch(anchor -> anchor.getText().equals("Jessica McCabe"));
+
         assertThat(hasText(view, "How to ADHD")).isTrue();
         assertThat(hasText(view, "Jessica McCabe")).isTrue();
         assertThat(hasText(view, "Eric Tivers")).isTrue();

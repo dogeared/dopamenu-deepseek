@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The landing page now also thanks Eric Tivers, with a link to the ADHD reWired
   YouTube channel.
+- Jessica McCabe's name on the landing page now links to the How to ADHD
+  YouTube channel.
 
 ## [0.1.1] - 2026-10-27
 
