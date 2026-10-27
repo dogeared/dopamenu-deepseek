@@ -14,5 +14,5 @@
 
 ## Chores
 
-- [ ] **chore:** update thanks on the homepage to include Eric Tivers
+- [x] **chore:** update thanks on the homepage to include Eric Tivers
 - [x] **chore:** create custom Keycloak login page to match styles with the app

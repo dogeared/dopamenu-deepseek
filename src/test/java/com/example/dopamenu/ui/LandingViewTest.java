@@ -59,10 +59,25 @@ class LandingViewTest {
                 .filteredOn(anchor -> LandingView.ORIGINAL_VIDEO_URL.equals(anchor.getHref()))
                 .allMatch(anchor -> anchor.getTarget().filter("_blank"::equals).isPresent());
 
+        assertThat(findAll(view, Anchor.class))
+                .filteredOn(anchor -> LandingView.CHANNEL_URL.equals(anchor.getHref()))
+                .hasSize(1)
+                .allMatch(anchor -> anchor.getTarget().filter("_blank"::equals).isPresent())
+                .allMatch(anchor -> anchor.getText().equals("Jessica McCabe"));
+
         assertThat(hasText(view, "How to ADHD")).isTrue();
         assertThat(hasText(view, "Jessica McCabe")).isTrue();
+        assertThat(hasText(view, "Eric Tivers")).isTrue();
+        assertThat(hasText(view, "ADHD reWired")).isTrue();
         assertThat(hasText(view, "Thank you")).isTrue();
         assertThat(hasText(view, "Where the idea comes from")).isTrue();
+
+        Anchor eric = findAll(view, Anchor.class).stream()
+                .filter(anchor -> "Eric Tivers".equals(anchor.getText()))
+                .findFirst()
+                .orElseThrow();
+        assertThat(eric.getHref()).isEqualTo(LandingView.ERIC_TIVERS_CHANNEL_URL);
+        assertThat(eric.getTarget()).contains("_blank");
     }
 
     @Test

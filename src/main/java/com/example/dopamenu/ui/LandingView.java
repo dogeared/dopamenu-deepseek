@@ -28,6 +28,10 @@ public class LandingView extends VerticalLayout {
 
     public static final String ORIGINAL_VIDEO_URL =
             "https://www.youtube.com/watch?v=-6WCkTwW6xg";
+    public static final String CHANNEL_URL = "https://www.youtube.com/@HowtoADHD";
+
+    public static final String ERIC_TIVERS_CHANNEL_URL =
+            "https://www.youtube.com/@ADHDreWired";
 
     public LandingView() {
         addClassName("landing-view");
@@ -145,8 +149,18 @@ public class LandingView extends VerticalLayout {
         video.setTarget("_blank");
         video.addClassName("inline-link");
         copy.add(video);
-        copy.add(new Span(". Thank you to Jessica McCabe and the How to ADHD team for "
-                + "the idea, and for making it so understandable."));
+        copy.add(new Span(". Thank you to "));
+        Anchor channel = new Anchor(CHANNEL_URL, "Jessica McCabe");
+        channel.setTarget("_blank");
+        channel.addClassName("inline-link");
+        copy.add(channel);
+        copy.add(new Span(" and the How to ADHD team, and to "));
+        Anchor eric = new Anchor(ERIC_TIVERS_CHANNEL_URL, "Eric Tivers");
+        eric.setTarget("_blank");
+        eric.addClassName("inline-link");
+        copy.add(eric);
+        copy.add(new Span(" of ADHD reWired, for the idea and for making it so "
+                + "understandable."));
 
         Anchor watch = new Anchor(ORIGINAL_VIDEO_URL, "Watch the original video");
         Css.add(watch, "btn", "btn-ghost");
