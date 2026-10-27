@@ -77,6 +77,11 @@ docker compose -f compose.keycloak.yaml up -d
 
 The realm is imported from `keycloak/realm-dopamenu.json` on first start.
 
+The Dopa Menu login theme in `keycloak/themes/dopamenu/` is mounted into the dev container.
+To use it, open the admin console, then **Realm settings → Themes → Login theme → `dopamenu`**.
+On a Keycloak you run elsewhere, copy that directory into its `themes/` directory and restart. It extends `keycloak.v2`, so it is
+CSS-only.
+
 ### 3. Run the app
 
 ```bash
@@ -171,7 +176,7 @@ framework wiring (`SecurityConfig`, `AppShell`, `DopaMenuApplication`) is exclud
 from the coverage gate; domain, service, configuration, and the Vaadin UI
 components are all measured.
 
-The production build writes `target/dopamenu-0.1.0.jar`; the Dockerfile uses it in a
+The production build writes `target/dopamenu-0.1.1.jar`; the Dockerfile uses it in a
 multi-stage build.
 
 ### Project layout
@@ -187,7 +192,7 @@ src/main/resources/
   application.yml
   db/migration/  Flyway migrations
   META-INF/resources/styles/dopamenu.css
-keycloak/        importable dev realm
+keycloak/        importable dev realm + login theme
 compose.yaml     app + Postgres
 compose.keycloak.yaml  optional dev Keycloak
 ```
