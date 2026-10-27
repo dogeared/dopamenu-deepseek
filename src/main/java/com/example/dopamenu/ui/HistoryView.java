@@ -46,6 +46,7 @@ public class HistoryView extends VerticalLayout {
         add(head());
         add(statGrid(stats));
         add(recent(orders));
+        add(new SiteFooter());
     }
 
     private Div head() {

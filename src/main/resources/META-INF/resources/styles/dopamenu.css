@@ -369,6 +369,191 @@ vaadin-app-layout::part(content) {
   color: var(--dm-faint);
 }
 
+/* ------------------------------------------------------------ landing page */
+
+.landing-view {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 36px 30px 84px;
+  box-sizing: border-box;
+  align-items: stretch;
+}
+
+.landing-view > * {
+  width: 100%;
+}
+
+.landing-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 46px 0 54px;
+  max-width: 760px;
+}
+
+.landing-title {
+  font-size: clamp(44px, 6vw, 74px);
+  line-height: 0.96;
+  letter-spacing: -0.045em;
+  margin: 16px 0 20px;
+  max-width: 16ch;
+}
+
+.landing-lede {
+  max-width: 60ch;
+  font-size: 16.5px;
+  line-height: 1.68;
+  color: var(--dm-muted);
+}
+
+.landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.landing-section {
+  padding: 40px 0 12px;
+  border-top: 1px solid var(--dm-line);
+  margin-top: 26px;
+}
+
+.landing-section-title {
+  font-size: clamp(28px, 3.4vw, 38px);
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  margin: 0 0 22px;
+}
+
+.landing-copy {
+  max-width: 68ch;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--dm-muted);
+}
+
+.landing-copy + .landing-copy {
+  margin-top: 14px;
+}
+
+.landing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.landing-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 22px;
+  background: rgba(255, 253, 248, 0.7);
+  border: 1px solid var(--dm-line);
+  border-radius: 20px;
+}
+
+.landing-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.landing-card-head h3 {
+  font-size: 21px;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.landing-card .course-icon-small {
+  display: grid;
+  place-items: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.landing-window {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--dm-faint);
+  white-space: nowrap;
+}
+
+.landing-card-tagline {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent, var(--dm-accent));
+}
+
+.landing-card-copy {
+  font-size: 13.5px;
+  line-height: 1.62;
+  color: var(--dm-muted);
+}
+
+.landing-step-number {
+  font-family: var(--dm-serif);
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--dm-accent);
+}
+
+.landing-step-title {
+  font-size: 20px;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.landing-origin {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 26px 28px;
+  background: var(--dm-ink);
+  border-radius: 24px;
+}
+
+.landing-origin .landing-copy {
+  color: rgba(251, 246, 237, 0.82);
+}
+
+.landing-origin .inline-link {
+  color: var(--dm-cream);
+}
+
+.landing-origin .inline-link:hover {
+  color: #ffffff;
+}
+
+.landing-origin .btn-ghost {
+  color: var(--dm-cream);
+  border-color: rgba(251, 246, 237, 0.38);
+}
+
+.landing-origin .btn-ghost:hover {
+  background: rgba(251, 246, 237, 0.12);
+}
+
+.nav-account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-login {
+  white-space: nowrap;
+}
+
+.nav-signout {
+  white-space: nowrap;
+}
+
 /* ------------------------------------------------------------ active order */
 
 .active-order {
@@ -1171,6 +1356,12 @@ vaadin-app-layout::part(content) {
   color: var(--dm-faint);
 }
 
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
 /* ----------------------------------------------------------------- dialogs */
 
 vaadin-dialog::part(overlay) {
@@ -1495,8 +1686,17 @@ vaadin-notification-card::part(content) {
 
   .menu-view,
   .history-view,
-  .manage-view {
+  .manage-view,
+  .landing-view {
     padding: 22px 18px 64px;
+  }
+
+  .landing-hero {
+    padding: 22px 0 34px;
+  }
+
+  .landing-section {
+    padding-top: 30px;
   }
 
   .hero {

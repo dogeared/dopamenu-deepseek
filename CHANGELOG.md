@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-27
+
+### Added
+
+- Public landing page at `/` that explains what a dopa-menu is, links to the
+  original How to ADHD video, and thanks the author. It stays reachable after
+  signing in and includes a login button for signed-out visitors.
+- A persistent footer on every page: “made with ❤️ by dogeared”, linking to the
+  GitHub repository.
+
+### Changed
+
+- The menu now lives at `/menu`; successful logins land there.
+- `Home` is part of the signed-in navigation, and the brand links to the landing
+  page.
+
+### Fixed
+
+- The public login button points at `/login`, which forwards to the Keycloak
+  authorization endpoint instead of producing a missing-route error.
+
 ## [0.0.3] - 2026-10-27
 
 ### Added
@@ -52,7 +73,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Set the project version to `0.0.1`.
 
-[Unreleased]: https://github.com/dogeared/dopamenu-deepseek/compare/v0.0.3...HEAD
+[Unreleased]: https://github.com/dogeared/dopamenu-deepseek/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/dogeared/dopamenu-deepseek/releases/tag/v0.1.0
 [0.0.3]: https://github.com/dogeared/dopamenu-deepseek/releases/tag/v0.0.3
 [0.0.2]: https://github.com/dogeared/dopamenu-deepseek/releases/tag/v0.0.2
 [0.0.1]: https://github.com/dogeared/dopamenu-deepseek/releases/tag/v0.0.1

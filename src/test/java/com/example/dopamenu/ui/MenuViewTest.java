@@ -77,8 +77,9 @@ class MenuViewTest {
         assertThat(hasText(view, "dishes on your menu")).isTrue();
         assertThat(findAll(view, CourseSection.class)).hasSize(4);
         assertThat(findAll(view, MenuItemCard.class)).hasSize(4);
+        assertThat(findAll(view, SiteFooter.class)).hasSize(1);
         assertThat(findAll(view, Anchor.class))
-                .anyMatch(anchor -> anchor.getHref().contains("youtube.com"));
+                .anyMatch(anchor -> SiteFooter.GITHUB_URL.equals(anchor.getHref()));
     }
 
     @Test

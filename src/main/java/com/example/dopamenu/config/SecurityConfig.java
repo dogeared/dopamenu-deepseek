@@ -17,7 +17,7 @@ public class SecurityConfig {
         // session. Vaadin serves this app's stylesheet and favicon from the
         // classpath, and the browser requests them before/while logging in.
         http.authorizeHttpRequests(requests -> requests
-                .requestMatchers("/actuator/health", "/actuator/health/**",
+                .requestMatchers("/", "/actuator/health", "/actuator/health/**",
                         "/favicon.ico", "/styles/**", "/images/**", "/VAADIN/**")
                 .permitAll());
 
@@ -25,7 +25,7 @@ public class SecurityConfig {
         // logout, request caching and route access control for the Flow UI.
         http.with(VaadinSecurityConfigurer.vaadin(), vaadin -> vaadin
                 .oauth2LoginPage("/oauth2/authorization/keycloak", "{baseUrl}")
-                .defaultSuccessUrl("/", true)
+                .defaultSuccessUrl("/menu", true)
                 .anyRequest(requests -> requests.authenticated()));
 
         return http.build();
