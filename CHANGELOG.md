@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Unit tests for the domain model, services, current-user resolution, and
+  Keycloak configuration, bringing line coverage above 90%.
+
+### Changed
+
+- Enforce a 90% line-coverage gate in the build and exclude presentation-only
+  Vaadin UI classes and framework wiring from the coverage report.
+
 ## [0.0.2] - 2026-10-27
 
 ### Fixed
