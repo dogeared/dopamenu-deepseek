@@ -136,6 +136,21 @@ KEYCLOAK_INTERNAL_URL=http://host.docker.internal:8180   # back-channel URL used
 
 When running the app on your machine, set both to your Keycloak URL.
 
+### Running on a shared dev host with HTTPS
+
+Browsers force HTTPS on every `.dev` name (HSTS preload), so `dopamenu.dev.dogeared.dev`
+needs TLS. Set up the Caddy wildcard-cert proxy once (see `deploy/dev-proxy/README.md`),
+then start the stack with the proxy overlay:
+
+```bash
+docker compose -f compose.yaml -f compose.keycloak.yaml -f compose.proxy.yaml up -d
+```
+
+The app is at <https://dopamenu.dev.dogeared.dev> and Keycloak at
+<https://dopamenu-auth.dev.dogeared.dev>. The realm import only runs on first start, so on an
+existing Keycloak add `https://dopamenu.dev.dogeared.dev/*` as a valid redirect URI and
+`https://dopamenu.dev.dogeared.dev` as a web origin on the `dopamenu-app` client.
+
 If you import `keycloak/realm-dopamenu.json`, change `sslRequired` back to `external` (or
 `all`) before using it anywhere except local development.
 

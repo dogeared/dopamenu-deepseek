@@ -1,0 +1,31 @@
+name: dev-proxy
+
+# One shared TLS proxy for every project on this machine. Projects join the
+# external `proxy` network and drop a snippet into ./sites/. Create the network
+# once:  docker network create proxy
+services:
+  caddy:
+    build: .
+    container_name: dev-proxy-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN:?set in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./sites:/etc/caddy/sites:ro
+      # Persist certs and the ACME account so restarts never re-issue (rate limits).
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
+
+volumes:
+  caddy-data:
+  caddy-config:

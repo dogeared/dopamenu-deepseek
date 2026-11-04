@@ -1,0 +1,9 @@
+@dopamenu host dopamenu.dev.dogeared.dev
+handle @dopamenu {
+	reverse_proxy dopamenu-app:8080
+}
+
+@dopamenu_auth host dopamenu-auth.dev.dogeared.dev
+handle @dopamenu_auth {
+	reverse_proxy dopamenu-keycloak:8080
+}

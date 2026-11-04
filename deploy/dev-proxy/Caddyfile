@@ -1,0 +1,16 @@
+# One wildcard site block means one cert for every host below. A wildcard only
+# matches a single label: foo.dev.dogeared.dev works, a.foo.dev.dogeared.dev does not.
+*.dev.dogeared.dev {
+	tls {
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+		# Don't let a split-horizon/internal resolver confuse the TXT check.
+		resolvers 1.1.1.1 8.8.8.8
+	}
+
+	# Each project adds sites/<name>.caddy with a named matcher + handle block.
+	import sites/*.caddy
+
+	handle {
+		respond "No site configured for this host" 404
+	}
+}

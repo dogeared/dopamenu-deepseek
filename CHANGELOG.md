@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `deploy/dev-proxy`: shared Caddy proxy with a `*.dev.dogeared.dev` wildcard
+  certificate (Cloudflare DNS challenge), and `compose.proxy.yaml` to run the
+  app and Keycloak behind it over HTTPS.
+- The dev realm accepts `https://dopamenu.dev.dogeared.dev` as a redirect URI
+  and web origin.
+
 ## [0.1.2] - 2026-10-27
 
 ### Changed

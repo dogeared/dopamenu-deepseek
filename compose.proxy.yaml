@@ -1,0 +1,22 @@
+# Overlay for running behind the shared dev proxy (deploy/dev-proxy), e.g.
+#   docker compose -f compose.yaml -f compose.keycloak.yaml -f compose.proxy.yaml up -d
+# The app is https://dopamenu.dev.dogeared.dev and Keycloak is
+# https://dopamenu-auth.dev.dogeared.dev. Both must be one DNS label under
+# dev.dogeared.dev to be covered by the wildcard cert.
+services:
+  app:
+    environment:
+      KEYCLOAK_PUBLIC_URL: https://dopamenu-auth.dev.dogeared.dev
+      # Container-to-container over the proxy network; skips the TLS round trip.
+      KEYCLOAK_INTERNAL_URL: http://dopamenu-keycloak:8080
+    networks: [default, proxy]
+
+  keycloak:
+    environment:
+      KC_HOSTNAME: https://dopamenu-auth.dev.dogeared.dev
+      KC_PROXY_HEADERS: xforwarded
+    networks: [default, proxy]
+
+networks:
+  proxy:
+    external: true
