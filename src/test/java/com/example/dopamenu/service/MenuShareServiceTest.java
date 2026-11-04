@@ -96,6 +96,24 @@ class MenuShareServiceTest {
         assertThat(share.isActive()).isTrue();
     }
 
+    /**
+     * Value: protects=revoke actually kills the caller's own live link; fails_when=the ownership
+     * filter is inverted or narrowed so the owner's own revoke is skipped; why_new=only the
+     * foreign-owner no-op is asserted, so a always-skip filter passes today; seam=none;
+     * no_claim=does not cover revoking an already-revoked link.
+     */
+    @Test
+    void revokeKillsTheOwnersOwnLiveLink() {
+        MenuShare share = new MenuShare("user-1", "token", "Micah");
+        UUID id = UUID.randomUUID();
+        when(repository.findById(id)).thenReturn(Optional.of(share));
+
+        service.revoke("user-1", id);
+
+        assertThat(share.isActive()).isFalse();
+        assertThat(share.getRevokedAt()).isNotNull();
+    }
+
     @Test
     void liveIgnoresBlankTokensWithoutHittingTheDatabase() {
         assertThat(service.live("  ")).isEmpty();
@@ -147,6 +165,25 @@ class MenuShareServiceTest {
 
         assertThat(service.copyOne("visitor", "token", wantedId)).contains(created);
         verify(menuItems).copyFrom("visitor", List.of(wanted), "token");
+    }
+
+    /**
+     * Value: protects=an order intent whose dish is not on the shared menu copies nothing and
+     * returns empty; fails_when=the id filter is lost so the first item of the share is copied
+     * and ordered instead; why_new=only the wanted-item and already-owned branches exist;
+     * seam=none; no_claim=does not cover a token that is already dead.
+     */
+    @Test
+    void copyOneDoesNothingWhenTheDishIsNotOnTheSharedMenu() {
+        MenuShare share = new MenuShare("sharer", "token", "Micah");
+        MenuItem other = mock(MenuItem.class);
+        when(other.getId()).thenReturn(UUID.randomUUID());
+        when(repository.findByTokenAndRevokedAtIsNull("token")).thenReturn(Optional.of(share));
+        when(menuItems.menuFor("sharer")).thenReturn(List.of(other));
+
+        assertThat(service.copyOne("visitor", "token", UUID.randomUUID())).isEmpty();
+        verify(menuItems, never()).copyFrom(any(), any(), any());
+        verify(events, never()).record(any(), any(), any(), any(), any());
     }
 
     @Test

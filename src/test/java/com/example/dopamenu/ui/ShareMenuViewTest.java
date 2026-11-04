@@ -8,11 +8,15 @@ import com.example.dopamenu.service.CurrentUser;
 import com.example.dopamenu.service.MenuEventService;
 import com.example.dopamenu.service.MenuItemService;
 import com.example.dopamenu.service.MenuShareService;
+import com.example.dopamenu.service.ShareIntent;
 import com.example.dopamenu.ui.component.CourseSection;
 import com.example.dopamenu.ui.component.MenuItemCard;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.page.Page;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,9 +25,11 @@ import static com.example.dopamenu.ui.UiTestSupport.findAll;
 import static com.example.dopamenu.ui.UiTestSupport.hasText;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -116,5 +122,33 @@ class ShareMenuViewTest {
         assertThat(hasText(view, "already your menu")).isTrue();
         assertThat(hasText(view, "Copy this menu")).isFalse();
         verify(events, never()).recordShareView(any(), any(), any());
+    }
+
+    /**
+     * Value: protects=the copy CTA stores a COPY intent for this token and sends an anonymous
+     * visitor to sign-in; fails_when=the button stores an ORDER intent, drops the token, or
+     * navigates straight to the menu; why_new=existing tests only render the page, never click
+     * the CTA; seam=none; no_claim=does not cover the authenticated branch.
+     */
+    @Test
+    void copyingTheWholeMenuStoresACopyIntentAndSendsTheVisitorToSignIn() {
+        when(shareService.live("token")).thenReturn(Optional.of(share()));
+        when(menuItemService.menuFor("sharer")).thenReturn(List.of());
+        when(currentUser.isAuthenticated()).thenReturn(false);
+        UI ui = mock(UI.class);
+        Page page = mock(Page.class);
+        when(ui.getPage()).thenReturn(page);
+
+        try (MockedStatic<UI> mockedUi = mockStatic(UI.class)) {
+            mockedUi.when(UI::getCurrent).thenReturn(ui);
+            ShareMenuView view = view();
+            view.render("token");
+
+            UiTestSupport.click(UiTestSupport.button(view, "Copy this menu"));
+        }
+
+        verify(shareService).storeIntent(argThat(intent ->
+                intent.action() == ShareIntent.Action.COPY && "token".equals(intent.token())));
+        verify(page).setLocation(LoginView.KEYCLOAK_LOGIN_URL);
     }
 }

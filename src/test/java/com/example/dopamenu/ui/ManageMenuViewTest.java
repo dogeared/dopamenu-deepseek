@@ -24,6 +24,7 @@ import static com.example.dopamenu.ui.UiTestSupport.findAll;
 import static com.example.dopamenu.ui.UiTestSupport.hasText;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -175,5 +176,30 @@ class ManageMenuViewTest {
         click(button(view, "Rotate link"));
 
         verify(shareService).rotate("user-1", "Ada");
+    }
+
+    /**
+     * Value: protects=a blank author name blocks link creation and marks the field instead of
+     * calling the service; fails_when=validName's guard is bypassed and the blank/whitespace name
+     * reaches MenuShareService.create; why_new=the create test clicks with a prefilled valid name,
+     * so the empty-name path is never entered; seam=none; no_claim=does not cover the duplicate
+     * ActiveShareException branch.
+     */
+    @Test
+    void aBlankAuthorNameBlocksLinkCreationAndMarksTheField() {
+        when(menuItemService.ensureSeeded("user-1")).thenReturn(List.of());
+        ManageMenuView view = new ManageMenuView(menuItemService, shareService, currentUser);
+        TextField name = findAll(view, TextField.class).stream()
+                .filter(field -> "Micah".equals(field.getValue()))
+                .findFirst()
+                .orElseThrow();
+        name.setValue("   ");
+
+        click(button(view, "Create link"));
+
+        verify(shareService, never()).create(org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any());
+        assertThat(name.isInvalid()).isTrue();
+        assertThat(name.getErrorMessage()).isEqualTo("Add the name you want on the link.");
     }
 }
