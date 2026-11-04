@@ -33,6 +33,29 @@ already runs. This file is the contract between the two repos.
    - `redirectUris`: `https://dopamenu.dogeared.dev/*`
    - `webOrigins`: `https://dopamenu.dogeared.dev`
    - `post.logout.redirect.uris`: `https://dopamenu.dogeared.dev/*`
+
+   That export is a **development** realm, not a production one. Before (or as
+   part of) the import, apply these realm-hygiene steps. Skipping them hands out
+   a known credential and a weakened transport policy on the first deploy:
+
+   - **Remove the bundled user.** `realm-dopamenu.json` ships an enabled
+     `demo` account with password `demo`. Delete the `users` entry before
+     import (or delete the user in the console) — otherwise anyone with this
+     repository can sign in to the public site as `demo`.
+   - **Rotate the client secret.** The export hard-codes
+     `dopamenu-secret` for `dopamenu-app`, which is also the application's
+     documented default. Generate a new secret in Keycloak and set it only via
+     `KEYCLOAK_CLIENT_SECRET` in the app service; never commit the production
+     value.
+   - **Re-enable transport security.** The export sets `sslRequired: none` for
+     local HTTP. Set it to `external` so the realm requires TLS for all
+     non-loopback clients.
+   - **Remove the development redirect URIs.** The export's `redirectUris`
+     include `http://localhost:8080/*`, `http://127.0.0.1:8080/*`,
+     `http://localhost:8083/*` and the dev-proxy host. The step above says
+     *add* the public hostnames; also *remove* the localhost and
+     `*.dev.dogeared.dev` entries so a public client cannot be driven from a
+     developer machine.
 3. **The app service**, built from this repo, joined to `tnra-shared`, with:
 
    ```yaml
