@@ -64,10 +64,12 @@ public class LandingView extends VerticalLayout {
         actions.addClassName("landing-actions");
         RouterLink open = new RouterLink("Open the menu", MenuView.class);
         Css.add(open, "btn", "btn-primary");
+        Anchor create = new Anchor("/register", "Create account");
+        Css.add(create, "btn", "btn-ghost");
         Anchor video = new Anchor(ORIGINAL_VIDEO_URL, "Watch the original idea");
         Css.add(video, "btn", "btn-ghost");
         video.setTarget("_blank");
-        actions.add(open, video);
+        actions.add(open, create, video);
 
         hero.add(eyebrow, title, lede, actions);
         return hero;

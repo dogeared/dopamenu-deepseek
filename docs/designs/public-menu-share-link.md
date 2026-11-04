@@ -568,3 +568,20 @@ that project now. With the proxy configuration gone, the dev realm's redirect UR
 longer include `https://dopamenu.dev.dogeared.dev`; add the host back in
 `keycloak/realm-dopamenu.json` when the centralized proxy fronts this app again. Nothing
 else in this design changes.
+
+## Public-host ownership note (2026-11-04)
+
+The `deploy/public/` plan in **Distribution Plan** is superseded. With the
+Cloudflare tunnel and a central Keycloak now running from
+`dogeared-central-infra`, a second Caddy and a second Keycloak in this repository would
+duplicate infrastructure that already exists. The public host is a configuration in that
+project; this repository owns the image, the realm export, the migrations and the
+application behavior.
+
+The contract, the environment variables central-infra must supply, and the off-network
+smoke test now live in `docs/deploy.md`. One consequence is recorded there explicitly:
+the design's `/admin*` and `/realms/master*` denial is satisfied structurally, because
+the app hostname routes only to this application, not to Keycloak. The realm changes
+(self-registration, `dopamenu` login theme) are applied in `keycloak/realm-dopamenu.json`
+as designed. Nothing about the event schema, the share lifecycle or the funnel queries
+changes.

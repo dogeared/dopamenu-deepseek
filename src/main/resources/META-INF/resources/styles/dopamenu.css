@@ -285,7 +285,8 @@ vaadin-app-layout::part(content) {
 
 .menu-view,
 .history-view,
-.manage-view {
+.manage-view,
+.share-view {
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
@@ -296,7 +297,8 @@ vaadin-app-layout::part(content) {
 
 .menu-view > *,
 .history-view > *,
-.manage-view > * {
+.manage-view > *,
+.share-view > * {
   width: 100%;
 }
 
@@ -412,6 +414,127 @@ vaadin-app-layout::part(content) {
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 28px;
+}
+
+/* ------------------------------------------------------------- share page */
+
+.share-hero {
+  align-items: center;
+  padding: 38px 0 44px;
+  border-bottom: 1px solid var(--dm-line);
+}
+
+.share-hero .hero-title {
+  max-width: 18ch;
+}
+
+.share-action {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px;
+  background: var(--dm-surface);
+  border: 1px solid var(--dm-line-strong);
+  border-radius: 20px;
+  box-shadow: 0 18px 40px -30px rgba(33, 29, 23, 0.4);
+}
+
+.share-action-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dm-muted);
+}
+
+.share-copy {
+  justify-content: center;
+  width: 100%;
+}
+
+.share-owner-note {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--dm-muted);
+}
+
+.share-dead {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  max-width: 46ch;
+  padding: 72px 0 96px;
+}
+
+.share-dead-title {
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+}
+
+.share-dead-copy {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--dm-muted);
+}
+
+/* ---------------------------------------------------------- share controls */
+
+.manage-share {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.9fr);
+  gap: 32px;
+  align-items: start;
+  margin-top: 26px;
+  padding: 30px;
+  background: var(--dm-surface);
+  border: 1px solid var(--dm-line);
+  border-radius: 22px;
+}
+
+.manage-share-title {
+  margin: 6px 0 10px;
+  font-size: 26px;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.manage-share-lede {
+  max-width: 46ch;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--dm-muted);
+}
+
+.manage-share-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.share-setup,
+.share-active {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.share-name,
+.share-url {
+  width: 100%;
+}
+
+.share-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  width: 100%;
+}
+
+.share-row vaadin-text-field {
+  flex: 1;
 }
 
 .landing-section {
@@ -541,6 +664,12 @@ vaadin-app-layout::part(content) {
 }
 
 .nav-account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-actions {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -968,6 +1097,9 @@ vaadin-app-layout::part(content) {
 
 .btn-quiet:hover {
   color: var(--dm-ink);
+}
+.btn-quiet.is-danger:hover {
+  color: var(--dm-accent);
 }
 
 .inline-link {
@@ -1672,6 +1804,11 @@ vaadin-notification-card::part(content) {
   .stat-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .manage-share {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
 }
 
 @media (max-width: 720px) {
@@ -1684,11 +1821,42 @@ vaadin-notification-card::part(content) {
     display: none;
   }
 
+  .nav-actions {
+    gap: 6px;
+  }
+
+  .nav-actions .btn {
+    padding: 10px 12px;
+    font-size: 12.5px;
+  }
+
   .menu-view,
   .history-view,
   .manage-view,
-  .landing-view {
+  .landing-view,
+  .share-view {
     padding: 22px 18px 64px;
+  }
+
+  .share-hero {
+    padding: 20px 0 30px;
+  }
+
+  .share-action {
+    padding: 18px;
+  }
+
+  .share-dead {
+    padding: 40px 0 64px;
+  }
+
+  .share-row {
+    flex-wrap: wrap;
+  }
+
+  .share-row .btn {
+    width: 100%;
+    justify-content: center;
   }
 
   .landing-hero {
@@ -1792,5 +1960,41 @@ vaadin-notification-card::part(content) {
 
   .active-copy {
     flex-basis: calc(100% - 30px);
+  }
+}
+
+/* ------------------------------------------------------------------- print */
+
+@media print {
+  html,
+  body {
+    background: #fff;
+  }
+
+  .app-header,
+  .share-action,
+  .site-footer,
+  .card-footer {
+    display: none !important;
+  }
+
+  .share-view {
+    max-width: none;
+    padding: 0;
+  }
+
+  .share-hero {
+    padding-top: 0;
+    border-bottom: 1px solid var(--dm-line-strong);
+  }
+
+  .course-section,
+  .menu-card {
+    break-inside: avoid;
+  }
+
+  .menu-card {
+    box-shadow: none;
+    background: #fff;
   }
 }

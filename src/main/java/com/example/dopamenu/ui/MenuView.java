@@ -6,7 +6,9 @@ import com.example.dopamenu.domain.MenuOrder;
 import com.example.dopamenu.service.CurrentUser;
 import com.example.dopamenu.service.MenuItemService;
 import com.example.dopamenu.service.MenuOrderService;
+import com.example.dopamenu.service.MenuShareService;
 import com.example.dopamenu.service.OrderStats;
+import com.example.dopamenu.service.ShareIntent;
 import com.example.dopamenu.ui.component.CourseSection;
 import com.example.dopamenu.ui.component.OrderDialog;
 import com.vaadin.flow.component.html.Div;
@@ -16,7 +18,10 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
@@ -26,21 +31,57 @@ import java.util.List;
 @Route(value = "menu", layout = MainLayout.class)
 @PageTitle("Dopa Menu")
 @PermitAll
-public class MenuView extends VerticalLayout {
+public class MenuView extends VerticalLayout implements AfterNavigationObserver {
 
     private final MenuItemService menuItemService;
     private final MenuOrderService orderService;
+    private final MenuShareService shareService;
     private final CurrentUser currentUser;
 
     public MenuView(MenuItemService menuItemService, MenuOrderService orderService,
-            CurrentUser currentUser) {
+            MenuShareService shareService, CurrentUser currentUser) {
         this.menuItemService = menuItemService;
         this.orderService = orderService;
+        this.shareService = shareService;
         this.currentUser = currentUser;
         addClassName("menu-view");
         setPadding(false);
         setSpacing(false);
         render();
+    }
+
+    /**
+     * A visitor who tapped Order or Copy on a shared menu comes back here with
+     * a single-use intent. Consuming it after navigation, rather than during
+     * {@code beforeEnter}, lets the order dialog attach to the UI.
+     */
+    @Override
+    public void afterNavigation(AfterNavigationEvent event) {
+        shareService.consumeIntent().ifPresent(this::applyIntent);
+    }
+
+    private void applyIntent(ShareIntent intent) {
+        if (shareService.live(intent.token()).isEmpty()) {
+            notice("That link is no longer active.");
+            return;
+        }
+        String owner = currentUser.id();
+        if (intent.action() == ShareIntent.Action.COPY) {
+            shareService.copyAll(owner, intent.token());
+            notice("Menu copied. It’s yours now.");
+            render();
+            return;
+        }
+        shareService.copyOne(owner, intent.token(), intent.itemId())
+                .ifPresentOrElse(item -> {
+                    render();
+                    Dialogs.open(new OrderDialog(item, orderService, currentUser,
+                            this::render));
+                }, () -> notice("That dish is no longer on the menu."));
+    }
+
+    void notice(String message) {
+        Notification.show(message);
     }
 
     private void render() {
