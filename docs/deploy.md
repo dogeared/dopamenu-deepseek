@@ -50,6 +50,14 @@ already runs. This file is the contract between the two repos.
    - **Re-enable transport security.** The export sets `sslRequired: none` for
      local HTTP. Set it to `external` so the realm requires TLS for all
      non-loopback clients.
+   - **Pin the realm's Frontend URL to the public auth host.** The app checks the
+     ID token's `iss` against `KEYCLOAK_PUBLIC_URL`, but the issuer is derived
+     from the request host unless the realm pins it. Open Realm settings, then
+     General, and set Frontend URL (or `attributes.frontendUrl`) to the public
+     issuer, e.g. `https://auth.<central-domain>`. Without it the browser signs
+     in and the app still rejects the token with `Invalid credentials`, because
+     the back-channel exchange through `KEYCLOAK_INTERNAL_URL` mints the
+     internal hostname as the issuer.
    - **Remove the development redirect URIs.** The export's `redirectUris`
      include `http://localhost:8080/*`, `http://127.0.0.1:8080/*`,
      `http://localhost:8083/*` and the dev-proxy host. The step above says
@@ -81,7 +89,7 @@ already runs. This file is the contract between the two repos.
 ### The admin path
 
 The design asked for `/admin*` and `/realms/master*` to be denied publicly.
-That is satisfied structurally, not by a rule: the app hostname routes only to
+That is satisfied structurally, not by a rule. The app hostname routes only to
 this application, which has no `/admin` or `/realms` handler. Keycloak is
 reached at its own hostname, where the operator's existing admin console
 protection already applies. Nothing extra needs to be configured for

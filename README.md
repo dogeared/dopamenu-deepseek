@@ -114,6 +114,25 @@ network, so it reaches Keycloak as `http://keycloak:8080`; the browser still use
 forwards `https://dopamenu.dev.dogeared.dev` to `host.docker.internal:8083`, which
 is why the container listens on 8083 rather than 8080.
 
+> **The issuer must match the browser host.** Keycloak derives the token issuer
+> from the host of the request that mints it. When `KEYCLOAK_PUBLIC_URL` is a
+> proxy host such as `https://auth.dev.dogeared.dev`, the browser reaches
+> Keycloak there but the container exchanges the code at `http://keycloak:8080`,
+> so the ID token comes back with `iss=http://keycloak:8080/...` and the app
+> rejects it with `Invalid credentials`. Pin the realm to the public host:
+>
+> ```bash
+> docker exec keycloak /opt/keycloak/bin/kcadm.sh config credentials \
+>   --server http://localhost:8080 --realm master --user admin --password admin
+> docker exec keycloak /opt/keycloak/bin/kcadm.sh update realms/dopamenu \
+>   -s attributes.frontendUrl=https://auth.dev.dogeared.dev
+> ```
+>
+> `--import-realm` only creates a realm that does not exist yet, so a re-import
+> or a fresh volume resets this; rerun the two commands after either. With the
+> default `KEYCLOAK_PUBLIC_URL=http://localhost:8180` the issuer already matches
+> and no pin is needed.
+
 If `local-infra` does not exist yet, create it once with
 `docker network create local-infra`.
 
