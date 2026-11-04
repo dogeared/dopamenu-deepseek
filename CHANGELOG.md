@@ -5,7 +5,7 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.4] - 2026-11-04
 
 ### Added
 
@@ -25,6 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   theme, so someone arriving from a shared menu can create an account.
 - `mvn verify` now runs one HTTP-level test against a Testcontainers Postgres,
   so it needs a working Docker daemon.
+- The Docker dev stack listens on port 8083 and reaches Keycloak by container
+  name, matching the shared local Keycloak and the dev reverse proxy. The
+  bundled realm also admits `localhost:8083` and the dev-proxy host.
 
 ## [0.1.3] - 2026-11-04
 
