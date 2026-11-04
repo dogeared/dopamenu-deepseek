@@ -10,13 +10,12 @@ class KeycloakPropertiesTest {
     void trimsTrailingSlashesAndBuildsEveryEndpoint() {
         KeycloakProperties properties = new KeycloakProperties(
                 "http://localhost:8180/", "http://keycloak:8180/", "dopamenu",
-                "dopamenu-app", "secret");
+                "dopamenu-app");
 
         assertThat(properties.publicUrl()).isEqualTo("http://localhost:8180");
         assertThat(properties.internalUrl()).isEqualTo("http://keycloak:8180");
         assertThat(properties.realm()).isEqualTo("dopamenu");
         assertThat(properties.clientId()).isEqualTo("dopamenu-app");
-        assertThat(properties.clientSecret()).isEqualTo("secret");
 
         assertThat(properties.issuer()).isEqualTo("http://localhost:8180/realms/dopamenu");
         assertThat(properties.authorizationUri())
@@ -35,7 +34,7 @@ class KeycloakPropertiesTest {
     void leavesUrlsWithoutTrailingSlashesAlone() {
         KeycloakProperties properties = new KeycloakProperties(
                 "http://localhost:8180", "http://keycloak:8180", "dopamenu",
-                "dopamenu-app", "secret");
+                "dopamenu-app");
 
         assertThat(properties.publicUrl()).isEqualTo("http://localhost:8180");
         assertThat(properties.internalUrl()).isEqualTo("http://keycloak:8180");
@@ -44,7 +43,7 @@ class KeycloakPropertiesTest {
     @Test
     void toleratesMissingUrls() {
         KeycloakProperties properties = new KeycloakProperties(
-                null, null, "dopamenu", "dopamenu-app", "secret");
+                null, null, "dopamenu", "dopamenu-app");
 
         assertThat(properties.publicUrl()).isNull();
         assertThat(properties.internalUrl()).isNull();

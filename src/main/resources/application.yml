@@ -27,7 +27,6 @@ app:
     internal-url: ${KEYCLOAK_INTERNAL_URL:http://localhost:8180}
     realm: ${KEYCLOAK_REALM:dopamenu}
     client-id: ${KEYCLOAK_CLIENT_ID:dopamenu-app}
-    client-secret: ${KEYCLOAK_CLIENT_SECRET:dopamenu-secret}
 
 server:
   port: ${SERVER_PORT:8080}
