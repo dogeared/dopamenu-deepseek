@@ -9,8 +9,10 @@ services:
     container_name: dev-proxy-caddy
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      # Bind to the LAN address only so the proxy never listens on a public
+      # interface. 0.0.0.0 (the default) listens everywhere.
+      - "${BIND_IP:-0.0.0.0}:80:80"
+      - "${BIND_IP:-0.0.0.0}:443:443"
     environment:
       CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN:?set in .env}
     volumes:

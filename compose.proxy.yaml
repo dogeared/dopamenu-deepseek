@@ -4,7 +4,15 @@
 # https://dopamenu-auth.dev.dogeared.dev. Both must be one DNS label under
 # dev.dogeared.dev to be covered by the wildcard cert.
 services:
+  db:
+    # The dev database uses default credentials; keep it off the LAN.
+    ports: !override
+      - "127.0.0.1:${DB_PORT:-5434}:5432"
+
   app:
+    # All traffic goes through the proxy, so don't also publish plain HTTP on the LAN.
+    ports: !override
+      - "127.0.0.1:${APP_PORT:-8080}:8080"
     environment:
       KEYCLOAK_PUBLIC_URL: https://dopamenu-auth.dev.dogeared.dev
       # Container-to-container over the proxy network; skips the TLS round trip.
@@ -12,6 +20,8 @@ services:
     networks: [default, proxy]
 
   keycloak:
+    ports: !override
+      - "127.0.0.1:${KEYCLOAK_PORT:-8180}:8080"
     environment:
       KC_HOSTNAME: https://dopamenu-auth.dev.dogeared.dev
       KC_PROXY_HEADERS: xforwarded

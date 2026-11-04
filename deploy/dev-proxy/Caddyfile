@@ -7,6 +7,13 @@
 		resolvers 1.1.1.1 8.8.8.8
 	}
 
+	# Defense in depth: even if a router forwards 443 by mistake, refuse anyone
+	# outside RFC 1918 / loopback / link-local ranges.
+	@outside not remote_ip private_ranges
+	handle @outside {
+		respond "Forbidden" 403
+	}
+
 	# Each project adds sites/<name>.caddy with a named matcher + handle block.
 	import sites/*.caddy
 
