@@ -59,8 +59,12 @@ where the `owner_sub` on the event is not the sharer's subject. One is enough fo
 "the loop works"; two or more from different events is "the loop repeats".
 
 **Sequencing bar — copying precedes ordering.** In the funnel, `menu_copied` or
-`order_started` must come from someone who also produced a `share_view`. This is the
-check that separates a real visitor from the owner testing their own link.
+`order_started` must come from a token that also produced a `share_view` before it.
+The bar is measured per link, not per person: a visitor is anonymous when the page
+loads, so a `share_view` carries only the token, while a copy or order carries the
+acting account's subject. A copy or order on a token with no earlier `share_view` on
+that token is not counted. This is the check that separates a real visitor from the
+owner testing their own link.
 
 ## Stop rule
 
@@ -121,7 +125,8 @@ one year and then pruned:
 delete from menu_event where occurred_at < now() - interval '1 year';
 ```
 
-The index on `(token, kind)` makes both the weekly queries and the prune cheap.
+The index on `(token, kind)` keeps the weekly funnel queries cheap; the one-year
+prune is a one-off scan by `occurred_at`.
 
 ## Results
 

@@ -83,10 +83,10 @@ docker compose -f compose.keycloak.yaml up -d
 
 The realm is imported from `keycloak/realm-dopamenu.json` on first start.
 
-The Dopa Menu login theme in `keycloak/themes/dopamenu/` is mounted into the dev container.
-To use it, open the admin console, then **Realm settings → Themes → Login theme → `dopamenu`**.
-On a Keycloak you run elsewhere, copy that directory into its `themes/` directory and restart. It extends `keycloak.v2`, so it is
-CSS-only.
+The Dopa Menu login theme in `keycloak/themes/dopamenu/` is mounted into the dev container,
+and the imported realm already selects it (`loginTheme` is `dopamenu` in
+`keycloak/realm-dopamenu.json`). On a Keycloak you run elsewhere, copy that directory into its
+`themes/` directory and restart. It extends `keycloak.v2`, so it is CSS-only.
 
 ### 3. Run the app
 
@@ -116,6 +116,9 @@ is why the container listens on 8083 rather than 8080.
 
 If `local-infra` does not exist yet, create it once with
 `docker network create local-infra`.
+
+For the public host, the realm-hygiene steps and the off-network smoke test, see
+[`docs/deploy.md`](docs/deploy.md).
 
 > If you change `APP_PORT`, update the client's redirect URIs in Keycloak accordingly
 > (`http://localhost:<port>/login/oauth2/code/keycloak`).
@@ -191,7 +194,7 @@ framework wiring (`SecurityConfig`, `AppShell`, `DopaMenuApplication`) is exclud
 from the coverage gate; domain, service, configuration, and the Vaadin UI
 components are all measured.
 
-The production build writes `target/dopamenu-0.1.3.jar`; the Dockerfile uses it in a
+The production build writes `target/dopamenu-0.1.4.jar`; the Dockerfile uses it in a
 multi-stage build.
 
 ### Project layout
@@ -199,9 +202,9 @@ multi-stage build.
 ```
 src/main/java/com/example/dopamenu/
   config/        security + Keycloak client registration
-  domain/        Course, MenuItem, MenuOrder (JPA entities)
+  domain/        Course, MenuItem, MenuOrder, MenuShare, MenuEvent (JPA entities)
   repository/    Spring Data repositories
-  service/       menu/order services and pure stats calculation
+  service/       menu, order, share and event services, plus pure stats calculation
   ui/            Vaadin views, dialogs and shared components
 src/main/resources/
   application.yml
@@ -224,8 +227,9 @@ compose.keycloak.yaml  optional dev Keycloak
 - `menu_share` — one active share link per owner: token, author display name, created and
   revoked timestamps. A partial unique index enforces the one-active-link rule.
 - `menu_event` — the funnel: `share_view`, `menu_copied`, `order_started`,
-  `order_completed`, with the token, owner and order id. Kept unbounded during the
-  experiment; see `docs/experiments/monetization-validation.md` for the prune statement.
+  `order_completed`, with the token, owner, order id and referrer. Kept unbounded
+  during the experiment; see `docs/experiments/monetization-validation.md` for the
+  prune statement.
 
 Statistics are calculated in `OrderStats` from the orders in the last seven days. `ACTIVE`
 orders do not count toward completion rate.
@@ -233,7 +237,7 @@ orders do not count toward completion rate.
 ### Security notes
 
 - All routes require an authenticated Keycloak user, except the landing page (`/`), the
-  share page (`/m/**`), `/register`, `/actuator/health`, the favicon, and the static
+  share page (`/m/**`), `/login`, `/register`, `/actuator/health`, the favicon, and the static
   stylesheet/VAADIN assets.
 - The share page carries `X-Robots-Tag: noindex` from a narrow servlet filter mapped to
   `/m/*`, so shared menus stay out of search results while the landing page does not.

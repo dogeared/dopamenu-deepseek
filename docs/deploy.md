@@ -15,7 +15,7 @@ already runs. This file is the contract between the two repos.
 | Artifact | Path / name | Notes |
 | --- | --- | --- |
 | Application image | `Dockerfile` at the repository root | Listens on `8080`; health at `/actuator/health` |
-| Local stack | `compose.yaml` (`db` + `app`) | Loopback ports, for development only |
+| Local stack | `compose.yaml` (`db` + `app`) | Host-published ports, for development only |
 | Realm export | `keycloak/realm-dopamenu.json` | Realm `dopamenu`, client `dopamenu-app` |
 | Login theme | `keycloak/themes/dopamenu/` | Mount into whichever Keycloak serves the realm |
 | Schema | `src/main/resources/db/migration/` | Flyway runs on boot; no manual step |
@@ -112,8 +112,9 @@ Then, in a private window on cellular data:
    select kind, count(*) from menu_event where token = '<token>' group by kind;
    ```
 
-   `share_view`, `menu_copied`, `order_started` and `order_completed` should all
-   be present for the tested token.
+   `share_view`, `menu_copied` and `order_started` should all be present for the
+   tested token; `order_completed` appears once the order started in step 2 is
+   completed.
 
 The four-week experiment clock starts when the link is posted into the named
 channel, not when this deploy succeeds.
