@@ -149,14 +149,18 @@ For the public host, the realm-hygiene steps and the off-network smoke test, see
 You do not need the bundled Keycloak. With your existing instance:
 
 1. Create a realm named `dopamenu` (or set `KEYCLOAK_REALM`).
-2. Create a **confidential** OpenID Connect client:
+2. Create an OpenID Connect client:
    - Client ID: `dopamenu-app` (or set `KEYCLOAK_CLIENT_ID`)
-   - Client authentication: **on**
+   - Client authentication: **off** (public client)
    - Standard flow: **on**
    - Valid redirect URIs: `http://localhost:8080/login/oauth2/code/keycloak`
    - Web origins: `http://localhost:8080`
    - Valid post-logout redirect URIs: `http://localhost:8080` (or use `+`)
-   - Copy the client secret into `KEYCLOAK_CLIENT_SECRET`
+   - On the Advanced tab, set Proof Key for Code Exchange Code Challenge Method
+     to `S256`
+
+   The app uses the authorization code flow with PKCE, so there is no client
+   secret to configure.
 3. Create a user, or reuse an existing one.
 
 The app resolves the Keycloak endpoint without OIDC discovery, so you can (and often must)
@@ -185,7 +189,7 @@ production profile, runs as an unprivileged user, listens on `8080`, and serves
 
 ```bash
 mvn -Pproduction verify        # tests + coverage gate; needs Docker for Testcontainers
-docker build -t dopamenu:0.1.4 .
+docker build -t dopamenu:0.1.5 .
 ```
 
 `mvn -Pproduction package` produces the same jar without the tests when CI has
@@ -200,7 +204,7 @@ The app needs a Postgres 17 database and the Keycloak settings in sections 3–6
 ```yaml
 services:
   app:
-    image: dopamenu:0.1.4
+    image: dopamenu:0.1.5
     restart: unless-stopped
     ports: ["8080:8080"]      # omit when the ingress joins this network instead
     environment:
@@ -211,7 +215,6 @@ services:
       KEYCLOAK_INTERNAL_URL: http://keycloak:8080
       KEYCLOAK_REALM: dopamenu
       KEYCLOAK_CLIENT_ID: dopamenu-app
-      KEYCLOAK_CLIENT_SECRET: <the client secret>
 ```
 
 - Flyway runs the migrations on boot and JPA runs in `validate` mode, so a schema
@@ -237,10 +240,10 @@ exists, delete it first; Keycloak does not overwrite an existing realm on
 import. It is the production artifact. It has no `demo` user, sets
 `sslRequired` to `external`, allows only the public redirect URIs, pins the
 Frontend URL to `https://auth.dogeared.dev`, and turns email verification on.
-Keycloak generates the client secret on import; copy it from the
-`dopamenu-app` client's Credentials tab. Configure the realm's Email settings
-before the first real signup, because verification fails closed until mail
-works.
+The client is public, so there is no secret to copy or rotate. The app proves
+itself with PKCE on every authorization code exchange. Configure the realm's
+Email settings before the first real signup, because verification fails closed
+until mail works.
 
 The manual equivalent, if you prefer to build the realm in the console, is
 below. The checked-in `keycloak/realm-dopamenu.json` is the development realm;
@@ -271,8 +274,8 @@ needs its own copy.
 In Clients, choose Create client:
 
 - Client type **OpenID Connect**, client ID `dopamenu-app`.
-- **Client authentication on** (confidential), **Standard flow on**, direct access
-  grants off, service accounts off.
+- **Client authentication off** (public client), **Standard flow on**, direct
+  access grants off, service accounts off.
 - Valid redirect URI: `https://dopamenu.<your-domain>/login/oauth2/code/keycloak`.
   Use that exact Spring callback path and keep it as the only redirect URI, with
   no localhost or wildcard entries.
@@ -281,8 +284,9 @@ In Clients, choose Create client:
 - On the Advanced tab, set Proof Key for Code Exchange Code Challenge Method to
   `S256`.
 
-Copy the secret from the client's Credentials tab into
-`KEYCLOAK_CLIENT_SECRET`, and rotate it there if it has ever been committed.
+There is no client secret. The app registers with
+`ClientAuthenticationMethod.NONE` and sends an S256 PKCE challenge, and Keycloak
+rejects an authorization request that omits it.
 
 ### 5. Install the login theme
 
@@ -350,7 +354,6 @@ database queries.
 | `KEYCLOAK_INTERNAL_URL` | `http://keycloak:8080` in Compose, `http://localhost:8180` when run from the host | Back-channel Keycloak base URL |
 | `KEYCLOAK_REALM` | `dopamenu` | Realm name |
 | `KEYCLOAK_CLIENT_ID` | `dopamenu-app` | OIDC client id |
-| `KEYCLOAK_CLIENT_SECRET` | `dopamenu-secret` | OIDC client secret |
 | `APP_PORT` | `8083` | Host port for the app in Compose |
 | `DB_PORT` | `5434` | Host port for Postgres in Compose |
 | `KEYCLOAK_PORT` | `8180` | Host port for bundled Keycloak |
@@ -377,7 +380,7 @@ framework wiring (`SecurityConfig`, `AppShell`, `DopaMenuApplication`) is exclud
 from the coverage gate; domain, service, configuration, and the Vaadin UI
 components are all measured.
 
-The production build writes `target/dopamenu-0.1.4.jar`; the Dockerfile uses it in a
+The production build writes `target/dopamenu-0.1.5.jar`; the Dockerfile uses it in a
 multi-stage build.
 
 ### Project layout
@@ -429,8 +432,8 @@ orders do not count toward completion rate.
 - Logout is RP-initiated (Keycloak ends the SSO session) and returns to the app.
 - ID-token issuer validation stays enabled. The public/internal URL split only affects which
   host is used for token exchange and JWKS.
-- The committed database password, client secret, and Keycloak admin/demo credentials are for
-  local development only. Replace them (and restore stricter `sslRequired` settings) before
+- The committed database password and Keycloak admin/demo credentials are for local
+  development only. Replace them (and restore stricter `sslRequired` settings) before
   exposing the stack anywhere.
 
 ---

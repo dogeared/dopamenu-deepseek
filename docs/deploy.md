@@ -38,7 +38,7 @@ already runs. This file is the contract between the two repos.
    Keycloak does not overwrite an existing realm on import. It already carries
    the production settings:
 
-   - Client `dopamenu-app` (confidential, standard flow, PKCE `S256`) with the
+   - Client `dopamenu-app` (public, standard flow, PKCE `S256`) with the
      exact redirect URI
      `https://dopamenu.dogeared.dev/login/oauth2/code/keycloak`, web origin
      `https://dopamenu.dogeared.dev`, and post-logout
@@ -48,19 +48,15 @@ already runs. This file is the contract between the two repos.
      back-channel exchange through `KEYCLOAK_INTERNAL_URL`.
    - `sslRequired: external`, self-registration on, duplicate emails off,
      login with email on, email verification and forgot-password on.
-   - No users and no client secret: Keycloak generates the secret on import, so
-     nothing reusable is committed to this repository.
+   - No users and no client secret. The client is public, so the repository has
+     nothing reusable to commit or rotate.
 
    The login theme must be mounted on the Keycloak that serves the realm
    (`keycloak/themes/dopamenu/`); without it the `dopamenu` login theme falls
    back to the stock theme.
 
-   Two values are intentionally not in the file, because they are secrets or
-   belong to the host:
+   One value is intentionally not in the file, because it belongs to the host:
 
-   - **Client secret.** Open the `dopamenu-app` client, go to Credentials, copy
-     the generated secret, and set it only via `KEYCLOAK_CLIENT_SECRET` in the
-     app service. Never commit the production value.
    - **SMTP.** Email settings are per realm. Fill in Host, Port, credentials and
      a From address under Realm settings, then Email, and use
      **Test connection**. Registration fails closed until mail works, so walk a
@@ -77,12 +73,13 @@ already runs. This file is the contract between the two repos.
      KEYCLOAK_INTERNAL_URL: http://keycloak:8080
      KEYCLOAK_REALM: dopamenu
      KEYCLOAK_CLIENT_ID: dopamenu-app
-     KEYCLOAK_CLIENT_SECRET: <the realm client's secret>
    ```
 
    `KEYCLOAK_PUBLIC_URL` must be the URL the browser uses and must match the
    realm's Frontend URL, because it is the token issuer. `KEYCLOAK_INTERNAL_URL`
-   is the container-to-container URL used for token exchange and JWKS.
+   is the container-to-container URL used for token exchange and JWKS. There is
+   no client secret: `KEYCLOAK_CLIENT_ID` names the public client, and PKCE
+   protects the authorization code exchange.
 
 4. **A database.** central-infra runs no shared Postgres, so the app keeps its
    own `postgres:17-alpine` service with a named volume, exactly as the root

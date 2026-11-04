@@ -5,18 +5,22 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.5] - 2026-11-04
 
 ### Added
 
 - `keycloak/realm-dopamenu.production.json`: a production realm export that can
   be imported directly instead of applying manual realm-hygiene steps. It has no
-  users, no committed client secret, `sslRequired: external`, only the public
+  users, a public client with no secret, `sslRequired: external`, only the public
   redirect URIs, the issuer pinned to `https://auth.dogeared.dev`, and email
   verification and forgot-password enabled.
 
 ### Changed
 
+- The app is a public OAuth client using the authorization code flow with PKCE,
+  and no client secret. `KEYCLOAK_CLIENT_SECRET` is gone from the environment and the config,
+  both realm exports mark `dopamenu-app` as public, and the docs no longer ask
+  for a secret.
 - `docs/deploy.md` and the README now point at the production realm export; the
   development export `keycloak/realm-dopamenu.json` stays local-only.
 

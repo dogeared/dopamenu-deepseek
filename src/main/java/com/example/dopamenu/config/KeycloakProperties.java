@@ -14,8 +14,7 @@ public record KeycloakProperties(
         String publicUrl,
         String internalUrl,
         String realm,
-        String clientId,
-        String clientSecret) {
+        String clientId) {
 
     public KeycloakProperties {
         publicUrl = trimTrailingSlash(publicUrl);

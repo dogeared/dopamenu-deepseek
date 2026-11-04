@@ -43,7 +43,6 @@ services:
       KEYCLOAK_INTERNAL_URL: ${KEYCLOAK_INTERNAL_URL:-http://keycloak:8080}
       KEYCLOAK_REALM: ${KEYCLOAK_REALM:-dopamenu}
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-dopamenu-app}
-      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-dopamenu-secret}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
