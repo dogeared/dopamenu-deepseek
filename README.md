@@ -108,9 +108,14 @@ back-channel calls.
 docker compose up --build
 ```
 
-The app container talks to the host Keycloak through `host.docker.internal:8180`
-(`extra_hosts` is configured for Linux and Docker Desktop). The browser still uses
-`http://localhost:8180`.
+Open <http://localhost:8083>. The app container joins the shared `local-infra`
+network, so it reaches Keycloak as `http://keycloak:8080`; the browser still uses
+`http://localhost:8180`. The dev reverse proxy in `~/Projects/local-keycloak`
+forwards `https://dopamenu.dev.dogeared.dev` to `host.docker.internal:8083`, which
+is why the container listens on 8083 rather than 8080.
+
+If `local-infra` does not exist yet, create it once with
+`docker network create local-infra`.
 
 > If you change `APP_PORT`, update the client's redirect URIs in Keycloak accordingly
 > (`http://localhost:<port>/login/oauth2/code/keycloak`).
@@ -137,7 +142,7 @@ split the URL used by the browser from the URL used inside Docker:
 
 ```bash
 KEYCLOAK_PUBLIC_URL=http://localhost:8180      # browser-facing URL, also the "iss" expected in tokens
-KEYCLOAK_INTERNAL_URL=http://host.docker.internal:8180   # back-channel URL used by the app container
+KEYCLOAK_INTERNAL_URL=http://keycloak:8080      # back-channel URL used by the app container
 ```
 
 When running the app on your machine, set both to your Keycloak URL.
@@ -156,11 +161,11 @@ If you import `keycloak/realm-dopamenu.json`, change `sslRequired` back to `exte
 | `DB_PASSWORD` | `dopamenu` | Database password |
 | `SERVER_PORT` | `8080` | App port (local runs) |
 | `KEYCLOAK_PUBLIC_URL` | `http://localhost:8180` | Browser-facing Keycloak base URL |
-| `KEYCLOAK_INTERNAL_URL` | `http://localhost:8180` | Back-channel Keycloak base URL |
+| `KEYCLOAK_INTERNAL_URL` | `http://keycloak:8080` in Compose, `http://localhost:8180` when run from the host | Back-channel Keycloak base URL |
 | `KEYCLOAK_REALM` | `dopamenu` | Realm name |
 | `KEYCLOAK_CLIENT_ID` | `dopamenu-app` | OIDC client id |
 | `KEYCLOAK_CLIENT_SECRET` | `dopamenu-secret` | OIDC client secret |
-| `APP_PORT` | `8080` | Host port for the app in Compose |
+| `APP_PORT` | `8083` | Host port for the app in Compose |
 | `DB_PORT` | `5434` | Host port for Postgres in Compose |
 | `KEYCLOAK_PORT` | `8180` | Host port for bundled Keycloak |
 

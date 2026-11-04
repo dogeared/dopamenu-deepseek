@@ -29,12 +29,18 @@
       "redirectUris": [
         "http://localhost:8080/*",
         "http://localhost:8081/*",
-        "http://127.0.0.1:8080/*"
+        "http://localhost:8083/*",
+        "http://127.0.0.1:8080/*",
+        "http://127.0.0.1:8083/*",
+        "https://dopamenu.dev.dogeared.dev/*"
       ],
       "webOrigins": [
         "http://localhost:8080",
         "http://localhost:8081",
-        "http://127.0.0.1:8080"
+        "http://localhost:8083",
+        "http://127.0.0.1:8080",
+        "http://127.0.0.1:8083",
+        "https://dopamenu.dev.dogeared.dev"
       ],
       "attributes": {
         "pkce.code.challenge.method": "S256",
