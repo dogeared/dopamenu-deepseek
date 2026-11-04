@@ -8,6 +8,7 @@
 - [ ] **feature:** integrate with Paddle for paid subscriptions — deferred by CEO review 2026-10-27 (D3.1). Reuse the tnra-billing service as a sidecar (1,766 main LOC, 96 tests, Paddle webhooks + entitlement gate); do not copy its classes. Blocked by a validated demand signal.
 - [ ] **feature:** distinguish which capabilities are free and which are paid — deferred by CEO review 2026-10-27 (D3.1). The agreed line: the full loop and the existing 7-day stats stay free (D6); Plus sells 90-day patterns, best time of day, mood-lifting courses and a monthly reflection (D4).
 - [ ] **feature:** webhook-based deposit confirmation — deferred by CEO review 2026-10-27 (D7). Manual weekly reconciliation is adequate under ~50 deposits; revisit when volume makes it slow.
+- [ ] **feature:** sign out from the profile chip — clicking the name or avatar in the upper right should open a small menu holding "Sign out". The chip is a static `Div` (`MainLayout.userChip`) and the only sign-out today is the drawer's `NativeButton` (`MainLayout.drawer`). Keyboard reachable, closes on outside click or Escape. Requested 2026-11-04.
 
 ## Bug fixes
 
@@ -17,6 +18,7 @@
 - [ ] **chore:** close the share-link review follow-ups — build the share URL from a configured public base instead of request headers (`ManageMenuView.absoluteUrl`), catch `DataIntegrityViolationException` in `MenuShareService.create`/`rotate` and map it to `ActiveShareException`, add the six state-matrix tests (`MenuShareService` rotate/create/revoke and `MenuShare.consume`), add the signed-in copy-CTA test in `ShareMenuViewTest`, and map the noindex filter to `/m` as well as `/m/*`. From `/ship` review passes 1–3 (2026-11-04).
 - [ ] **chore:** finish the dev-stack port move — `Dockerfile` still says `EXPOSE 8080`, the README "Using your own Keycloak" section still lists only `localhost:8080`, and `mvn test` now aborts without Docker (put the Testcontainers test behind a profile or `@EnabledIfDockerAvailable`). From `/ship` review passes 2–3 (2026-11-04).
 - [ ] **chore:** harden the shared-menu funnel before the experiment — dedupe `share_view` per session/token (a `curl` loop clears the 20-view reach floor), tie an anonymous view to the later order/copy, and bound attribution to the 28-day window (`MenuOrderService.start` stamps the token on copied items). From `/ship` adversarial review (2026-11-04).
+- [ ] **chore:** require email validation on account creation — the realm export leaves `verifyEmail` off because there is no SMTP server (decision D5 in `docs/designs/public-menu-share-link.md`), and `/register` hands straight off to Keycloak's registration. Add SMTP settings plus `verifyEmail: true` to `keycloak/realm-dopamenu.json`, and have the app explain the pending-verification state on the first sign-in after signup instead of failing silently. Requested 2026-11-04.
 
 - [x] **chore:** update thanks on the homepage to include Eric Tivers
 - [x] **chore:** create custom Keycloak login page to match styles with the app
