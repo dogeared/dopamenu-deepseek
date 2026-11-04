@@ -28,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Docker dev stack listens on port 8083 and reaches Keycloak by container
   name, matching the shared local Keycloak and the dev reverse proxy. The
   bundled realm also admits `localhost:8083` and the dev-proxy host.
+- The README now documents the production build and deploy path: the image,
+  runtime environment, production realm and client settings, and the login
+  theme. It also makes enabling Keycloak's email verification the launch
+  requirement, since the production Keycloak already sends mail.
 
 ## [0.1.3] - 2026-11-04
 

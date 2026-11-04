@@ -57,7 +57,14 @@ already runs. This file is the contract between the two repos.
      issuer, e.g. `https://auth.<central-domain>`. Without it the browser signs
      in and the app still rejects the token with `Invalid credentials`, because
      the back-channel exchange through `KEYCLOAK_INTERNAL_URL` mints the
-     internal hostname as the issuer.
+     internal hostname as the issuer. Verification and password-reset links are
+     also built from this value.
+   - **Require email verification.** Under Realm settings, then Login, turn on
+     Require email verification (the `verifyEmail` attribute), and fill in the
+     Email settings. Registration then sends a verification link, and Keycloak
+     blocks the OIDC flow until the address is confirmed, so the app needs no
+     extra code. Test the round trip with a real mailbox before the launch. A
+     realm with verification on and no working SMTP fails closed and silently.
    - **Remove the development redirect URIs.** The export's `redirectUris`
      include `http://localhost:8080/*`, `http://127.0.0.1:8080/*`,
      `http://localhost:8083/*` and the dev-proxy host. The step above says
