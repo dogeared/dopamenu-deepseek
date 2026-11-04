@@ -2,6 +2,7 @@ package com.example.dopamenu.service;
 
 import com.example.dopamenu.domain.Course;
 import com.example.dopamenu.domain.DopamineLevel;
+import com.example.dopamenu.domain.MenuEvent;
 import com.example.dopamenu.domain.MenuItem;
 import com.example.dopamenu.domain.MenuOrder;
 import com.example.dopamenu.domain.OrderStatus;
@@ -27,12 +28,60 @@ class MenuOrderServiceTest {
 
     private final MenuOrderRepository orderRepository = mock(MenuOrderRepository.class);
     private final MenuItemRepository itemRepository = mock(MenuItemRepository.class);
+    private final MenuEventService events = mock(MenuEventService.class);
     private final MenuOrderService service = new MenuOrderService(orderRepository,
-            itemRepository);
+            itemRepository, events);
 
     private MenuItem item() {
         return new MenuItem("user-1", Course.ENTREE, "A long walk", null,
                 45, DopamineLevel.BRIGHT, false);
+    }
+
+    @Test
+    void startRecordsAnOrderStartedEventWithTheItemsShareToken() {
+        UUID itemId = UUID.randomUUID();
+        MenuItem item = new MenuItem("user-1", Course.ENTREE, "A long walk", null,
+                45, DopamineLevel.BRIGHT, false, "share-token");
+        when(orderRepository.findFirstByOwnerSubAndStatusOrderByStartedAtDesc("user-1",
+                OrderStatus.ACTIVE)).thenReturn(Optional.empty());
+        when(itemRepository.findByIdAndOwnerSub(itemId, "user-1"))
+                .thenReturn(Optional.of(item));
+        when(orderRepository.save(any(MenuOrder.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.start("user-1", itemId, 4);
+
+        verify(events).record(MenuEvent.Kind.ORDER_STARTED, "user-1", "share-token", null,
+                null);
+    }
+
+    @Test
+    void completeRecordsAnOrderCompletedEventWithTheOrdersShareToken() {
+        MenuItem item = new MenuItem("user-1", Course.ENTREE, "A long walk", null,
+                45, DopamineLevel.BRIGHT, false, "share-token");
+        MenuOrder order = new MenuOrder("user-1", item, 2);
+        UUID orderId = UUID.randomUUID();
+        when(orderRepository.findByIdAndOwnerSub(orderId, "user-1"))
+                .thenReturn(Optional.of(order));
+
+        service.complete("user-1", orderId, 5, null);
+
+        verify(events).record(MenuEvent.Kind.ORDER_COMPLETED, "user-1", "share-token", null,
+                null);
+    }
+
+    @Test
+    void aFinishedOrderDoesNotEmitASecondCompletionEvent() {
+        MenuOrder order = new MenuOrder("user-1", item(), 2);
+        order.complete(4, "first");
+        UUID orderId = UUID.randomUUID();
+        when(orderRepository.findByIdAndOwnerSub(orderId, "user-1"))
+                .thenReturn(Optional.of(order));
+
+        service.complete("user-1", orderId, 5, "second");
+
+        verify(events, never()).record(eq(MenuEvent.Kind.ORDER_COMPLETED), any(), any(), any(),
+                any());
     }
 
     @Test

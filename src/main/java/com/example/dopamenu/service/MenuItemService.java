@@ -7,9 +7,14 @@ import com.example.dopamenu.repository.MenuItemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class MenuItemService {
@@ -47,10 +52,52 @@ public class MenuItemService {
 
     @Transactional
     public MenuItem create(String ownerSub, MenuItemDraft draft) {
+        return create(ownerSub, draft, null);
+    }
+
+    /**
+     * The single insert path for menu items, including copies. Carrying
+     * {@code sourceShareToken} here keeps item rules from drifting between the
+     * form and the share page.
+     */
+    @Transactional
+    public MenuItem create(String ownerSub, MenuItemDraft draft, String sourceShareToken) {
         MenuItem item = new MenuItem(ownerSub, draft.course(), draft.title().trim(),
                 blankToNull(draft.description()), draft.durationMinutes(),
-                draft.dopamineLevel(), draft.timerRequired() || draft.course().caution());
+                draft.dopamineLevel(), draft.timerRequired() || draft.course().caution(),
+                sourceShareToken);
         return repository.save(item);
+    }
+
+    /**
+     * Copies the source items the visitor does not already have. A duplicate is
+     * skipped and keeps whatever token it already carries: an item the visitor
+     * owned before the click was not caused by the link.
+     *
+     * @return only the rows this call created
+     */
+    @Transactional
+    public List<MenuItem> copyFrom(String ownerSub, List<MenuItem> source, String token) {
+        Set<String> existing = repository.findByOwnerSubAndArchivedFalse(ownerSub).stream()
+                .map(MenuItemService::dedupeKey)
+                .collect(Collectors.toCollection(HashSet::new));
+        List<MenuItem> created = new ArrayList<>();
+        for (MenuItem item : source) {
+            if (!existing.add(dedupeKey(item))) {
+                continue;
+            }
+            created.add(create(ownerSub, draftOf(item), token));
+        }
+        return created;
+    }
+
+    private static String dedupeKey(MenuItem item) {
+        return item.getCourse().name() + "|" + item.getTitle().trim().toLowerCase(Locale.ROOT);
+    }
+
+    private static MenuItemDraft draftOf(MenuItem item) {
+        return new MenuItemDraft(item.getTitle(), item.getDescription(), item.getCourse(),
+                item.getDurationMinutes(), item.getDopamineLevel(), item.isTimerRequired());
     }
 
     @Transactional

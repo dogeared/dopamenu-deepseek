@@ -1,5 +1,6 @@
 package com.example.dopamenu.service;
 
+import com.example.dopamenu.domain.MenuEvent;
 import com.example.dopamenu.domain.MenuItem;
 import com.example.dopamenu.domain.MenuOrder;
 import com.example.dopamenu.domain.OrderStatus;
@@ -19,11 +20,13 @@ public class MenuOrderService {
 
     private final MenuOrderRepository orderRepository;
     private final MenuItemRepository itemRepository;
+    private final MenuEventService events;
 
     public MenuOrderService(MenuOrderRepository orderRepository,
-            MenuItemRepository itemRepository) {
+            MenuItemRepository itemRepository, MenuEventService events) {
         this.orderRepository = orderRepository;
         this.itemRepository = itemRepository;
+        this.events = events;
     }
 
     @Transactional(readOnly = true)
@@ -39,7 +42,10 @@ public class MenuOrderService {
         });
         MenuItem item = itemRepository.findByIdAndOwnerSub(itemId, ownerSub)
                 .orElseThrow(() -> new IllegalArgumentException("Menu item not found"));
-        return orderRepository.save(new MenuOrder(ownerSub, item, moodBefore));
+        MenuOrder order = orderRepository.save(new MenuOrder(ownerSub, item, moodBefore));
+        events.record(MenuEvent.Kind.ORDER_STARTED, ownerSub, item.getSourceShareToken(),
+                order.getId(), null);
+        return order;
     }
 
     @Transactional
@@ -50,6 +56,8 @@ public class MenuOrderService {
             return order;
         }
         order.complete(moodAfter, note == null || note.isBlank() ? null : note.trim());
+        events.record(MenuEvent.Kind.ORDER_COMPLETED, ownerSub, order.getShareToken(),
+                order.getId(), null);
         return order;
     }
 

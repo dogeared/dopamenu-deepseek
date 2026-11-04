@@ -43,6 +43,13 @@ public class MenuItem {
     @Column(name = "timer_required", nullable = false)
     private boolean timerRequired;
 
+    /**
+     * The share token this item was copied through, or null when the owner
+     * created it themselves. Set once, at creation.
+     */
+    @Column(name = "source_share_token", length = 22)
+    private String sourceShareToken;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -55,6 +62,13 @@ public class MenuItem {
 
     public MenuItem(String ownerSub, Course course, String title, String description,
             int durationMinutes, DopamineLevel dopamineLevel, boolean timerRequired) {
+        this(ownerSub, course, title, description, durationMinutes, dopamineLevel, timerRequired,
+                null);
+    }
+
+    public MenuItem(String ownerSub, Course course, String title, String description,
+            int durationMinutes, DopamineLevel dopamineLevel, boolean timerRequired,
+            String sourceShareToken) {
         this.ownerSub = ownerSub;
         this.course = course;
         this.title = title;
@@ -62,6 +76,7 @@ public class MenuItem {
         this.durationMinutes = durationMinutes;
         this.dopamineLevel = dopamineLevel;
         this.timerRequired = timerRequired;
+        this.sourceShareToken = sourceShareToken;
         this.createdAt = Instant.now();
     }
 
@@ -119,6 +134,10 @@ public class MenuItem {
 
     public void setTimerRequired(boolean timerRequired) {
         this.timerRequired = timerRequired;
+    }
+
+    public String getSourceShareToken() {
+        return sourceShareToken;
     }
 
     public Instant getCreatedAt() {

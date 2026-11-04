@@ -63,6 +63,13 @@ public class MenuOrder {
     @Column(length = 600)
     private String note;
 
+    /**
+     * The share token that led to this order, copied from the item at start
+     * time so attribution survives revocation.
+     */
+    @Column(name = "share_token", length = 22)
+    private String shareToken;
+
     protected MenuOrder() {
         // for JPA
     }
@@ -76,6 +83,7 @@ public class MenuOrder {
         this.plannedMinutes = item.getDurationMinutes();
         this.startedAt = Instant.now();
         this.moodBefore = moodBefore;
+        this.shareToken = item.getSourceShareToken();
     }
 
     public UUID getId() {
@@ -124,6 +132,10 @@ public class MenuOrder {
 
     public String getNote() {
         return note;
+    }
+
+    public String getShareToken() {
+        return shareToken;
     }
 
     public void complete(int moodAfter, String note) {
