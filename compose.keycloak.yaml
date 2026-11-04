@@ -11,8 +11,10 @@ services:
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-      # The browser-facing hostname. The app reaches Keycloak over the
-      # published host port (host.docker.internal:8180) for back-channel calls.
+      # The browser-facing hostname. Both compose files set `name: dopamenu`, so
+      # the app container resolves this service as `keycloak` on the shared
+      # `dopamenu_default` network for back-channel calls; it does not need to
+      # join local-infra.
       KC_HOSTNAME: ${KEYCLOAK_PUBLIC_URL:-http://localhost:8180}
       KC_HTTP_ENABLED: "true"
       KC_HEALTH_ENABLED: "true"

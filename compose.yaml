@@ -25,26 +25,38 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "${APP_PORT:-8080}:8080"
+      # 8083 is the port the dev proxy forwards to (nginx server_name
+      # dopamenu.dev.dogeared.dev -> host.docker.internal:8083). The container
+      # listens on the same port so the proxy and a shell inside it agree.
+      - "${APP_PORT:-8083}:8083"
     environment:
+      SERVER_PORT: 8083
       DB_URL: jdbc:postgresql://db:5432/dopamenu
       DB_USER: dopamenu
       DB_PASSWORD: dopamenu
       # The browser uses the public URL; token exchange and JWKS use the
-      # internal URL, which reaches a Keycloak running on the host.
+      # internal URL. The shared Keycloak in ~/Projects/local-keycloak answers
+      # to `keycloak` on local-infra. The optional compose.keycloak.yaml service
+      # answers to the same name on the implicit `dopamenu_default` network
+      # (both files set `name: dopamenu`), so either setup resolves it.
       KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL:-http://localhost:8180}
-      KEYCLOAK_INTERNAL_URL: ${KEYCLOAK_INTERNAL_URL:-http://host.docker.internal:8180}
+      KEYCLOAK_INTERNAL_URL: ${KEYCLOAK_INTERNAL_URL:-http://keycloak:8080}
       KEYCLOAK_REALM: ${KEYCLOAK_REALM:-dopamenu}
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-dopamenu-app}
       KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-dopamenu-secret}
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    networks:
+      - default
+      - local-infra
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "curl", "-fsS", "http://localhost:8083/actuator/health"]
       interval: 10s
       timeout: 4s
       start_period: 40s
       retries: 5
+
+networks: { local-infra: { external: true } }
 
 volumes:
   dopamenu-pg:
