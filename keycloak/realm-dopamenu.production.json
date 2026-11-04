@@ -1,0 +1,45 @@
+{
+  "realm": "dopamenu",
+  "enabled": true,
+  "displayName": "Dopa Menu",
+  "sslRequired": "external",
+  "registrationAllowed": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "verifyEmail": true,
+  "loginTheme": "dopamenu",
+  "editUsernameAllowed": false,
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "attributes": {
+    "frontendUrl": "https://auth.dogeared.dev"
+  },
+  "clients": [
+    {
+      "clientId": "dopamenu-app",
+      "name": "Dopa Menu",
+      "description": "Vaadin web application",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "https://dopamenu.dogeared.dev/login/oauth2/code/keycloak"
+      ],
+      "webOrigins": [
+        "https://dopamenu.dogeared.dev"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "https://dopamenu.dogeared.dev/*"
+      }
+    }
+  ],
+  "users": []
+}

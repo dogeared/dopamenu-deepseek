@@ -169,8 +169,9 @@ KEYCLOAK_INTERNAL_URL=http://keycloak:8080      # back-channel URL used by the a
 
 When running the app on your machine, set both to your Keycloak URL.
 
-If you import `keycloak/realm-dopamenu.json`, change `sslRequired` back to `external` (or
-`all`) before using it anywhere except local development.
+If you import a realm export outside local development, use
+`keycloak/realm-dopamenu.production.json`. `keycloak/realm-dopamenu.json` is the
+development realm (`demo` user, `sslRequired: none`, localhost redirect URIs).
 
 ---
 
@@ -230,10 +231,20 @@ For the ingress route, the shared database, and the two-repo contract, see
 
 ### 3. Create the production realm
 
-Start from a new realm. Do not import `keycloak/realm-dopamenu.json`: that is the
-development realm, and it ships a `demo`/`demo` account, `sslRequired: none`, and
-localhost redirect URIs. If you import it as a shortcut, apply every hygiene step
-in [`docs/deploy.md`](docs/deploy.md) before the first sign-in.
+Import `keycloak/realm-dopamenu.production.json` (open Create realm and choose
+Resource file, or run `kcadm create realms -f`). If a `dopamenu` realm already
+exists, delete it first; Keycloak does not overwrite an existing realm on
+import. It is the production artifact. It has no `demo` user, sets
+`sslRequired` to `external`, allows only the public redirect URIs, pins the
+Frontend URL to `https://auth.dogeared.dev`, and turns email verification on.
+Keycloak generates the client secret on import; copy it from the
+`dopamenu-app` client's Credentials tab. Configure the realm's Email settings
+before the first real signup, because verification fails closed until mail
+works.
+
+The manual equivalent, if you prefer to build the realm in the console, is
+below. The checked-in `keycloak/realm-dopamenu.json` is the development realm;
+do not import it here.
 
 In Realm settings, open General:
 
