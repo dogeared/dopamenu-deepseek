@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-11-04
+
+### Added
+
+- `docs/designs/public-menu-share-link.md`: the approved and eng-reviewed design
+  for a public, anonymous menu share link with view, copy, start and completion
+  attribution. Application behavior is unchanged in this release.
+
 ## [0.1.2] - 2026-10-27
 
 ### Changed
