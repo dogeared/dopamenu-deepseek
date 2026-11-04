@@ -212,12 +212,13 @@ class MenuViewTest {
         when(shareService.live("token"))
                 .thenReturn(Optional.of(new MenuShare("sharer", "token", "Micah")));
         when(shareService.copyAll("user-1", "token")).thenReturn(List.of(item));
-        MenuView view = new MenuView(menuItemService, orderService, shareService,
-                currentUser);
+        MenuView view = spy(new MenuView(menuItemService, orderService, shareService,
+                currentUser));
 
         view.afterNavigation(null);
 
         verify(shareService).copyAll("user-1", "token");
+        verify(view).notice("Menu copied. It’s yours now.");
     }
 
     @Test
@@ -236,5 +237,59 @@ class MenuViewTest {
 
         verify(shareService, never()).copyOne(any(), any(), any());
         verify(view).notice("That link is no longer active.");
+    }
+
+    /**
+     * Value: protects=an order intent whose dish vanished from the shared menu ends in a notice
+     * and no dialog; fails_when=copyOne's empty result is treated as success (blank OrderDialog
+     * on a null item) or the notice is silently dropped; why_new=only the copied-found and
+     * dead-token branches are asserted; seam=none; no_claim=does not test copyAll's empty case.
+     */
+    @Test
+    void anOrderIntentForADishThatLeftTheMenuShowsANoticeAndOpensNothing() {
+        MenuItem item = item(Course.APPETIZER, "Water");
+        when(menuItemService.ensureSeeded("user-1")).thenReturn(List.of(item));
+        when(orderService.stats("user-1", 7)).thenReturn(stats());
+        when(orderService.activeOrder("user-1")).thenReturn(Optional.empty());
+        UUID vanishedId = UUID.randomUUID();
+        when(shareService.consumeIntent())
+                .thenReturn(Optional.of(ShareIntent.order("token", vanishedId)));
+        when(shareService.live("token"))
+                .thenReturn(Optional.of(new MenuShare("sharer", "token", "Micah")));
+        when(shareService.copyOne("user-1", "token", vanishedId)).thenReturn(Optional.empty());
+        MenuView view = spy(new MenuView(menuItemService, orderService, shareService,
+                currentUser));
+
+        view.afterNavigation(null);
+
+        verify(view).notice("That dish is no longer on the menu.");
+        assertThat(findAll(UI.getCurrent(), Dialog.class)).isEmpty();
+    }
+
+    /**
+     * Value: protects=the copy CTA never claims success when the copy created nothing;
+     * fails_when=applyIntent ignores copyAll's result (a visitor whose seeded starter menu
+     * already covers every dish is told the menu was copied, and the funnel records no
+     * menu_copied event); why_new=the existing copy test stubs a non-empty result and only
+     * verifies the call; seam=none; no_claim=does not test the event emission itself.
+     */
+    @Test
+    void aCopyIntentThatCreatesNothingSaysYouAlreadyHaveIt() {
+        MenuItem item = item(Course.APPETIZER, "Water");
+        when(menuItemService.ensureSeeded("user-1")).thenReturn(List.of(item));
+        when(orderService.stats("user-1", 7)).thenReturn(stats());
+        when(orderService.activeOrder("user-1")).thenReturn(Optional.empty());
+        when(shareService.consumeIntent())
+                .thenReturn(Optional.of(ShareIntent.copy("token")));
+        when(shareService.live("token"))
+                .thenReturn(Optional.of(new MenuShare("sharer", "token", "Micah")));
+        when(shareService.copyAll("user-1", "token")).thenReturn(List.of());
+        MenuView view = spy(new MenuView(menuItemService, orderService, shareService,
+                currentUser));
+
+        view.afterNavigation(null);
+
+        verify(view).notice("You already have every dish on that menu.");
+        verify(view, never()).notice("Menu copied. It’s yours now.");
     }
 }

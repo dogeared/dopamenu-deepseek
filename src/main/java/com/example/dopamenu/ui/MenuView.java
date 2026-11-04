@@ -67,8 +67,10 @@ public class MenuView extends VerticalLayout implements AfterNavigationObserver 
         }
         String owner = currentUser.id();
         if (intent.action() == ShareIntent.Action.COPY) {
-            shareService.copyAll(owner, intent.token());
-            notice("Menu copied. It’s yours now.");
+            List<MenuItem> created = shareService.copyAll(owner, intent.token());
+            notice(created.isEmpty()
+                    ? "You already have every dish on that menu."
+                    : "Menu copied. It’s yours now.");
             render();
             return;
         }

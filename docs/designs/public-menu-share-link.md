@@ -276,9 +276,10 @@ Both actions require an account, so the interesting design is the handoff.
 Copies, never live references. Clone `title`, `description`, `course`, `durationMinutes`,
 `dopamineLevel`, the dessert timer rule, and `sourceShareToken` from the share being copied,
 with `archived = false`. Dedupe on `(title, course)` case-insensitively against the visitor's
-existing items, so a second click is a no-op; when a duplicate is reused and its
-`sourceShareToken` is null, set it to the share being copied, and never overwrite a non-null
-one. Later edits or deletion by the sharer do not propagate. Seeded starter items are left
+existing items, so a second click is a no-op. `sourceShareToken` is stamped **only on the rows
+the copy creates**: a reused duplicate keeps whatever token it already had, so a visitor's own
+pre-existing dish is never credited to a link that did not supply it (D3 = A). Later edits or
+deletion by the sharer do not propagate. Seeded starter items are left
 untouched; copied items append to them and remain individually editable or archivable —
 replacing the seed set would require tracking which items are pristine, which is more state
 than v1 earns.
