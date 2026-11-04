@@ -278,7 +278,7 @@ Copies, never live references. Clone `title`, `description`, `course`, `duration
 with `archived = false`. Dedupe on `(title, course)` case-insensitively against the visitor's
 existing items, so a second click is a no-op. `sourceShareToken` is stamped **only on the rows
 the copy creates**: a reused duplicate keeps whatever token it already had, so a visitor's own
-pre-existing dish is never credited to a link that did not supply it (D3 = A). Later edits or
+pre-existing dish is never credited to a link that did not supply it. Later edits or
 deletion by the sharer do not propagate. Seeded starter items are left
 untouched; copied items append to them and remain individually editable or archivable —
 replacing the seed set would require tracking which items are pristine, which is more state
