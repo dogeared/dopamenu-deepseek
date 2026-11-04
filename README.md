@@ -169,8 +169,172 @@ KEYCLOAK_INTERNAL_URL=http://keycloak:8080      # back-channel URL used by the a
 
 When running the app on your machine, set both to your Keycloak URL.
 
-If you import `keycloak/realm-dopamenu.json`, change `sslRequired` back to `external` (or
-`all`) before using it anywhere except local development.
+If you import a realm export outside local development, use
+`keycloak/realm-dopamenu.production.json`. `keycloak/realm-dopamenu.json` is the
+development realm (`demo` user, `sslRequired: none`, localhost redirect URIs).
+
+---
+
+## Production build and deploy
+
+The image is the deployable artifact. It builds the Vaadin frontend bundle in the
+production profile, runs as an unprivileged user, listens on `8080`, and serves
+`/actuator/health` for a platform health check.
+
+### 1. Build the image
+
+```bash
+mvn -Pproduction verify        # tests + coverage gate; needs Docker for Testcontainers
+docker build -t dopamenu:0.1.4 .
+```
+
+`mvn -Pproduction package` produces the same jar without the tests when CI has
+already run them. The Dockerfile builds inside the image and copies
+`target/dopamenu-*.jar` to `/app/app.jar`, so tag the image with the version in
+`pom.xml`.
+
+### 2. Run the container
+
+The app needs a Postgres 17 database and the Keycloak settings in sections 3–6:
+
+```yaml
+services:
+  app:
+    image: dopamenu:0.1.4
+    restart: unless-stopped
+    ports: ["8080:8080"]      # omit when the ingress joins this network instead
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/dopamenu
+      DB_USER: dopamenu
+      DB_PASSWORD: <secret>
+      KEYCLOAK_PUBLIC_URL: https://auth.<your-domain>
+      KEYCLOAK_INTERNAL_URL: http://keycloak:8080
+      KEYCLOAK_REALM: dopamenu
+      KEYCLOAK_CLIENT_ID: dopamenu-app
+      KEYCLOAK_CLIENT_SECRET: <the client secret>
+```
+
+- Flyway runs the migrations on boot and JPA runs in `validate` mode, so a schema
+  that does not match the migrations stops the container instead of drifting.
+- `KEYCLOAK_PUBLIC_URL` is the browser-facing base URL **and** the issuer the app
+  expects in every ID token. `KEYCLOAK_INTERNAL_URL` is the container-to-container
+  URL used for token exchange and JWKS; it does not have to match.
+- Keep secrets in the orchestrator's secret store or an untracked env file, never
+  in a committed `.env`.
+- TLS terminates at the ingress, which must forward `X-Forwarded-Proto` and
+  `X-Forwarded-Host`. Spring's `forward-headers-strategy: framework` uses them to
+  build the OAuth redirect URI, so a missing header sends the callback to
+  `http://` or to the container hostname.
+
+For the ingress route, the shared database, and the two-repo contract, see
+[`docs/deploy.md`](docs/deploy.md).
+
+### 3. Create the production realm
+
+Import `keycloak/realm-dopamenu.production.json` (open Create realm and choose
+Resource file, or run `kcadm create realms -f`). If a `dopamenu` realm already
+exists, delete it first; Keycloak does not overwrite an existing realm on
+import. It is the production artifact. It has no `demo` user, sets
+`sslRequired` to `external`, allows only the public redirect URIs, pins the
+Frontend URL to `https://auth.dogeared.dev`, and turns email verification on.
+Keycloak generates the client secret on import; copy it from the
+`dopamenu-app` client's Credentials tab. Configure the realm's Email settings
+before the first real signup, because verification fails closed until mail
+works.
+
+The manual equivalent, if you prefer to build the realm in the console, is
+below. The checked-in `keycloak/realm-dopamenu.json` is the development realm;
+do not import it here.
+
+In Realm settings, open General:
+
+- Realm name `dopamenu` (or set `KEYCLOAK_REALM`).
+- Frontend URL `https://auth.<your-domain>` (the realm attribute `frontendUrl`).
+  This pins the issuer, so the back-channel exchange cannot mint the internal
+  hostname as `iss`.
+- Require SSL `external`.
+
+In Realm settings, open Login:
+
+- User registration **on**. The app's "Create account" call to action and the
+  `/register` route both depend on it.
+- Duplicate emails **off**, login with email **on**.
+- Require email verification **on**, described in section 6.
+
+In Realm settings, open Email. Fill in the SMTP host, port, credentials, and a
+From address, then use **Test connection**. SMTP is configured per realm, so a
+realm that already sends mail keeps its own settings; the `dopamenu` realm
+needs its own copy.
+
+### 4. Create the client
+
+In Clients, choose Create client:
+
+- Client type **OpenID Connect**, client ID `dopamenu-app`.
+- **Client authentication on** (confidential), **Standard flow on**, direct access
+  grants off, service accounts off.
+- Valid redirect URI: `https://dopamenu.<your-domain>/login/oauth2/code/keycloak`.
+  Use that exact Spring callback path and keep it as the only redirect URI, with
+  no localhost or wildcard entries.
+- Valid post-logout redirect URIs: `https://dopamenu.<your-domain>/*`.
+- Web origins: `https://dopamenu.<your-domain>`.
+- On the Advanced tab, set Proof Key for Code Exchange Code Challenge Method to
+  `S256`.
+
+Copy the secret from the client's Credentials tab into
+`KEYCLOAK_CLIENT_SECRET`, and rotate it there if it has ever been committed.
+
+### 5. Install the login theme
+
+Copy the theme into the Keycloak instance that serves the realm:
+
+```bash
+cp -R keycloak/themes/dopamenu <keycloak-home>/themes/
+```
+
+Then open Realm settings, go to Themes, set Login theme to `dopamenu`, and
+restart Keycloak so it rescans the theme directory. A container can mount the
+directory read-only instead of copying it, and an optimized image must run
+`kc.sh build` before `kc.sh start --optimized` so the theme is baked in:
+
+```yaml
+volumes:
+  - ./keycloak/themes/dopamenu:/opt/keycloak/themes/dopamenu:ro
+```
+
+The theme extends `keycloak.v2` and is CSS-only, so it carries no templates to
+rebase on a Keycloak upgrade. There is no custom email theme; verification and
+password-reset messages use Keycloak's stock templates.
+
+### 6. Require email verification
+
+Turn on **Require email verification** under Realm settings, then Login (the
+realm attribute `verifyEmail`). With SMTP configured, Keycloak sends the
+verification message at registration and blocks the OIDC flow until the address
+is confirmed.
+The app needs no extra code and has no "unverified" state to render.
+
+- The verification link is built from the realm's Frontend URL. If that points at
+  anything but the public auth host, new users receive a dead link.
+- Turn on **Forgot password** (`resetPasswordAllowed`) as well, so a locked-out
+  user can recover without an operator.
+- Use a real mailbox on the first pass. Register an account, wait for the
+  message, click the link, and only then sign in. A realm with verification on
+  and SMTP misconfigured fails closed — registration succeeds and no mail
+  arrives.
+
+### 7. Verify the deploy
+
+```bash
+curl -sI https://dopamenu.<your-domain>/                 # 200
+curl -s  https://dopamenu.<your-domain>/actuator/health  # {"status":"UP"}
+curl -sI https://dopamenu.<your-domain>/menu             # 302 to the Keycloak auth endpoint
+```
+
+Then create an account through `/register` with a real address, confirm the
+verification email arrives and works, and sign in. [`docs/deploy.md`](docs/deploy.md)
+has the full off-network smoke test, including the share-link funnel and the
+database queries.
 
 ---
 

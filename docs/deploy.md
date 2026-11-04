@@ -16,7 +16,8 @@ already runs. This file is the contract between the two repos.
 | --- | --- | --- |
 | Application image | `Dockerfile` at the repository root | Listens on `8080`; health at `/actuator/health` |
 | Local stack | `compose.yaml` (`db` + `app`) | Host-published ports, for development only |
-| Realm export | `keycloak/realm-dopamenu.json` | Realm `dopamenu`, client `dopamenu-app` |
+| Production realm export | `keycloak/realm-dopamenu.production.json` | Import directly into the central Keycloak |
+| Development realm export | `keycloak/realm-dopamenu.json` | Local only; contains the `demo` user and localhost URIs |
 | Login theme | `keycloak/themes/dopamenu/` | Mount into whichever Keycloak serves the realm |
 | Schema | `src/main/resources/db/migration/` | Flyway runs on boot; no manual step |
 
@@ -26,44 +27,45 @@ already runs. This file is the contract between the two repos.
    `dopamenu.dogeared.dev`) to `http://dopamenu-app:8080` on `tnra-shared`.
    The Cloudflare hostname is proxied by the tunnel, so TLS is the edge's job;
    no certificate or Caddy block is needed here.
-2. **A `dopamenu` realm** imported from `keycloak/realm-dopamenu.json`, served
-   by the central Keycloak. Because the Keycloak hostname is shared with the
-   other tenants, the realm export must be re-imported with the public hostnames
-   added to the client:
-   - `redirectUris`: `https://dopamenu.dogeared.dev/*`
-   - `webOrigins`: `https://dopamenu.dogeared.dev`
-   - `post.logout.redirect.uris`: `https://dopamenu.dogeared.dev/*`
+2. **A `dopamenu` realm** imported from
+   `keycloak/realm-dopamenu.production.json`, served by the central Keycloak.
+   That file is the production artifact; `keycloak/realm-dopamenu.json` remains
+   the local development realm and is not imported here.
 
-   That export is a **development** realm, not a production one. Before (or as
-   part of) the import, apply these realm-hygiene steps. Skipping them hands out
-   a known credential and a weakened transport policy on the first deploy:
+   Import it with the admin console (**Create realm**, then **Resource file**) or
+   `kcadm create realms -f keycloak/realm-dopamenu.production.json`. If a
+   `dopamenu` realm already exists from an earlier trial, delete it first:
+   Keycloak does not overwrite an existing realm on import. It already carries
+   the production settings:
 
-   - **Remove the bundled user.** `realm-dopamenu.json` ships an enabled
-     `demo` account with password `demo`. Delete the `users` entry before
-     import (or delete the user in the console) — otherwise anyone with this
-     repository can sign in to the public site as `demo`.
-   - **Rotate the client secret.** The export hard-codes
-     `dopamenu-secret` for `dopamenu-app`, which is also the application's
-     documented default. Generate a new secret in Keycloak and set it only via
-     `KEYCLOAK_CLIENT_SECRET` in the app service; never commit the production
-     value.
-   - **Re-enable transport security.** The export sets `sslRequired: none` for
-     local HTTP. Set it to `external` so the realm requires TLS for all
-     non-loopback clients.
-   - **Pin the realm's Frontend URL to the public auth host.** The app checks the
-     ID token's `iss` against `KEYCLOAK_PUBLIC_URL`, but the issuer is derived
-     from the request host unless the realm pins it. Open Realm settings, then
-     General, and set Frontend URL (or `attributes.frontendUrl`) to the public
-     issuer, e.g. `https://auth.<central-domain>`. Without it the browser signs
-     in and the app still rejects the token with `Invalid credentials`, because
-     the back-channel exchange through `KEYCLOAK_INTERNAL_URL` mints the
-     internal hostname as the issuer.
-   - **Remove the development redirect URIs.** The export's `redirectUris`
-     include `http://localhost:8080/*`, `http://127.0.0.1:8080/*`,
-     `http://localhost:8083/*` and the dev-proxy host. The step above says
-     *add* the public hostnames; also *remove* the localhost and
-     `*.dev.dogeared.dev` entries so a public client cannot be driven from a
-     developer machine.
+   - Client `dopamenu-app` (confidential, standard flow, PKCE `S256`) with the
+     exact redirect URI
+     `https://dopamenu.dogeared.dev/login/oauth2/code/keycloak`, web origin
+     `https://dopamenu.dogeared.dev`, and post-logout
+     `https://dopamenu.dogeared.dev/*`.
+   - Frontend URL `https://auth.dogeared.dev`, so the issuer is
+     `https://auth.dogeared.dev/realms/dopamenu` for the browser and for the
+     back-channel exchange through `KEYCLOAK_INTERNAL_URL`.
+   - `sslRequired: external`, self-registration on, duplicate emails off,
+     login with email on, email verification and forgot-password on.
+   - No users and no client secret: Keycloak generates the secret on import, so
+     nothing reusable is committed to this repository.
+
+   The login theme must be mounted on the Keycloak that serves the realm
+   (`keycloak/themes/dopamenu/`); without it the `dopamenu` login theme falls
+   back to the stock theme.
+
+   Two values are intentionally not in the file, because they are secrets or
+   belong to the host:
+
+   - **Client secret.** Open the `dopamenu-app` client, go to Credentials, copy
+     the generated secret, and set it only via `KEYCLOAK_CLIENT_SECRET` in the
+     app service. Never commit the production value.
+   - **SMTP.** Email settings are per realm. Fill in Host, Port, credentials and
+     a From address under Realm settings, then Email, and use
+     **Test connection**. Registration fails closed until mail works, so walk a
+     real signup through the mailed verification link before launch.
+
 3. **The app service**, built from this repo, joined to `tnra-shared`, with:
 
    ```yaml
@@ -71,16 +73,16 @@ already runs. This file is the contract between the two repos.
      DB_URL: jdbc:postgresql://<host>:5432/dopamenu
      DB_USER: dopamenu
      DB_PASSWORD: <secret>
-     KEYCLOAK_PUBLIC_URL: https://auth.<central-domain>
+     KEYCLOAK_PUBLIC_URL: https://auth.dogeared.dev
      KEYCLOAK_INTERNAL_URL: http://keycloak:8080
      KEYCLOAK_REALM: dopamenu
      KEYCLOAK_CLIENT_ID: dopamenu-app
      KEYCLOAK_CLIENT_SECRET: <the realm client's secret>
    ```
 
-   `KEYCLOAK_PUBLIC_URL` must be the URL the browser uses, because it is the
-   token issuer. `KEYCLOAK_INTERNAL_URL` is the container-to-container URL used
-   for token exchange and JWKS.
+   `KEYCLOAK_PUBLIC_URL` must be the URL the browser uses and must match the
+   realm's Frontend URL, because it is the token issuer. `KEYCLOAK_INTERNAL_URL`
+   is the container-to-container URL used for token exchange and JWKS.
 
 4. **A database.** central-infra runs no shared Postgres, so the app keeps its
    own `postgres:17-alpine` service with a named volume, exactly as the root
