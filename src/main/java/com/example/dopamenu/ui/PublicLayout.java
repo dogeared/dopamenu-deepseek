@@ -63,10 +63,16 @@ public class PublicLayout extends AppLayout {
     private static Component account(CurrentUser currentUser,
             AuthenticationContext authenticationContext) {
         if (!currentUser.isAuthenticated()) {
+            Div actions = new Div();
+            actions.addClassName("nav-actions");
+            Anchor create = new Anchor("/register", "Create account");
+            Css.add(create, "btn", "btn-ghost", "nav-create");
+            create.getElement().setAttribute("aria-label", "Create a Dopa Menu account");
             Anchor login = new Anchor("/login", "Log in");
             Css.add(login, "btn", "btn-primary", "nav-login");
             login.getElement().setAttribute("aria-label", "Log in with Keycloak");
-            return login;
+            actions.add(create, login);
+            return actions;
         }
 
         Div account = new Div();

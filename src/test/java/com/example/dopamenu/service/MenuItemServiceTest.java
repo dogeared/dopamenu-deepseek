@@ -191,6 +191,70 @@ class MenuItemServiceTest {
     }
 
     @Test
+    void copyFromStampsOnlyTheRowsItCreates() {
+        MenuItem alreadyOwned = item(Course.ENTREE, "A long walk");
+        MenuItem missing = item(Course.SIDE, "Podcast while cleaning");
+        when(repository.findByOwnerSubAndArchivedFalse("visitor"))
+                .thenReturn(List.of(alreadyOwned));
+        when(repository.save(any(MenuItem.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        List<MenuItem> created = service.copyFrom("visitor", List.of(alreadyOwned, missing),
+                "share-token");
+
+        assertThat(created).hasSize(1);
+        assertThat(created.get(0).getTitle()).isEqualTo("Podcast while cleaning");
+        assertThat(created.get(0).getSourceShareToken()).isEqualTo("share-token");
+        assertThat(alreadyOwned.getSourceShareToken()).isNull();
+    }
+
+    @Test
+    void copyFromDedupesCaseInsensitively() {
+        MenuItem alreadyOwned = item(Course.ENTREE, "a long walk");
+        MenuItem sameItemFromTheShare = item(Course.ENTREE, "A LONG WALK");
+        when(repository.findByOwnerSubAndArchivedFalse("visitor"))
+                .thenReturn(List.of(alreadyOwned));
+
+        List<MenuItem> created = service.copyFrom("visitor", List.of(sameItemFromTheShare),
+                "share-token");
+
+        assertThat(created).isEmpty();
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void aReusedDuplicateKeepsWhateverTokenItAlreadyHad() {
+        MenuItem alreadyOwned = new MenuItem("visitor", Course.ENTREE, "A long walk", null,
+                45, DopamineLevel.BRIGHT, false, "older-token");
+        when(repository.findByOwnerSubAndArchivedFalse("visitor"))
+                .thenReturn(List.of(alreadyOwned));
+
+        service.copyFrom("visitor", List.of(alreadyOwned), "newer-token");
+
+        assertThat(alreadyOwned.getSourceShareToken()).isEqualTo("older-token");
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void aSecondCopyOfTheSameSourceChangesNothing() {
+        MenuItem first = item(Course.ENTREE, "A long walk");
+        MenuItem second = item(Course.SIDE, "Podcast while cleaning");
+        when(repository.findByOwnerSubAndArchivedFalse("visitor"))
+                .thenReturn(List.of(first, second));
+
+        assertThat(service.copyFrom("visitor", List.of(first, second), "share-token"))
+                .isEmpty();
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void aCopyOfNothingCreatesNothing() {
+        when(repository.findByOwnerSubAndArchivedFalse("visitor")).thenReturn(List.of());
+
+        assertThat(service.copyFrom("visitor", List.of(), "share-token")).isEmpty();
+    }
+
+    @Test
     void theStarterMenuCoversEveryCourseAndTimeBoxesDesserts() {
         List<MenuItem> starters = MenuItemService.DefaultMenu.seedFor("user-1");
 

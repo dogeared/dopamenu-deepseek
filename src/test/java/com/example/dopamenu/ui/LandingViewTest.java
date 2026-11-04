@@ -86,6 +86,9 @@ class LandingViewTest {
 
         assertThat(findAll(view, RouterLink.class))
                 .anyMatch(link -> hasText(link, "Open the menu"));
+        assertThat(findAll(view, Anchor.class))
+                .anyMatch(anchor -> "Create account".equals(anchor.getText())
+                        && "/register".equals(anchor.getHref()));
     }
 
     @Test

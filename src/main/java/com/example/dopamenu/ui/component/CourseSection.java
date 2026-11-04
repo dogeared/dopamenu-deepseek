@@ -17,6 +17,16 @@ import java.util.function.Consumer;
 public class CourseSection extends Div {
 
     public CourseSection(Course course, List<MenuItem> items, Consumer<MenuItem> onOrder) {
+        this(course, items, onOrder, true);
+    }
+
+    /**
+     * @param linkToManage whether an empty course offers a link into the
+     *                     owner's editor. The public share page passes
+     *                     {@code false}: its visitors have no menu yet.
+     */
+    public CourseSection(Course course, List<MenuItem> items, Consumer<MenuItem> onOrder,
+            boolean linkToManage) {
         addClassName("course-section");
         addClassName("course-" + course.cssName());
 
@@ -49,10 +59,13 @@ public class CourseSection extends Div {
         if (items.isEmpty()) {
             Div empty = new Div();
             empty.addClassName("course-empty");
-            Span text = new Span("Nothing on this course yet. ");
-            RouterLink add = new RouterLink("Add something", ManageMenuView.class);
-            add.addClassName("inline-link");
-            empty.add(text, add);
+            empty.add(new Span("Nothing on this course yet."));
+            if (linkToManage) {
+                empty.add(new Span(" "));
+                RouterLink add = new RouterLink("Add something", ManageMenuView.class);
+                add.addClassName("inline-link");
+                empty.add(add);
+            }
             grid.add(empty);
         } else {
             items.forEach(item -> grid.add(new MenuItemCard(item, onOrder)));

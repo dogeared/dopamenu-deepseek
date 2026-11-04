@@ -3,15 +3,19 @@ package com.example.dopamenu.ui;
 import com.example.dopamenu.domain.Course;
 import com.example.dopamenu.domain.DopamineLevel;
 import com.example.dopamenu.domain.MenuItem;
+import com.example.dopamenu.domain.MenuShare;
 import com.example.dopamenu.service.CurrentUser;
 import com.example.dopamenu.service.MenuItemService;
+import com.example.dopamenu.service.MenuShareService;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.textfield.TextField;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.example.dopamenu.ui.UiTestSupport.button;
 import static com.example.dopamenu.ui.UiTestSupport.buttonByAriaLabel;
@@ -20,6 +24,7 @@ import static com.example.dopamenu.ui.UiTestSupport.findAll;
 import static com.example.dopamenu.ui.UiTestSupport.hasText;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,12 +32,15 @@ import static org.mockito.Mockito.when;
 class ManageMenuViewTest {
 
     private final MenuItemService menuItemService = mock(MenuItemService.class);
+    private final MenuShareService shareService = mock(MenuShareService.class);
     private final CurrentUser currentUser = mock(CurrentUser.class);
 
     @BeforeEach
     void setUp() {
         UiTestSupport.installUi();
         when(currentUser.id()).thenReturn("user-1");
+        when(currentUser.displayName()).thenReturn("Micah");
+        when(shareService.activeFor("user-1")).thenReturn(Optional.empty());
     }
 
     @AfterEach
@@ -53,7 +61,7 @@ class ManageMenuViewTest {
                 item(Course.DESSERT, "One video", "Just one", true));
         when(menuItemService.ensureSeeded("user-1")).thenReturn(items);
 
-        ManageMenuView view = new ManageMenuView(menuItemService, currentUser);
+        ManageMenuView view = new ManageMenuView(menuItemService, shareService, currentUser);
 
         assertThat(hasText(view, "Edit the menu.")).isTrue();
         assertThat(hasText(view, "New dish")).isTrue();
@@ -71,7 +79,7 @@ class ManageMenuViewTest {
     @Test
     void newDishOpensTheCreateForm() {
         when(menuItemService.ensureSeeded("user-1")).thenReturn(List.of());
-        ManageMenuView view = new ManageMenuView(menuItemService, currentUser);
+        ManageMenuView view = new ManageMenuView(menuItemService, shareService, currentUser);
 
         click(button(view, "New dish"));
 
@@ -87,7 +95,7 @@ class ManageMenuViewTest {
     void editOpensTheFormPopulatedWithThatItem() {
         MenuItem item = item(Course.ENTREE, "A long walk", "Outside", false);
         when(menuItemService.ensureSeeded("user-1")).thenReturn(List.of(item));
-        ManageMenuView view = new ManageMenuView(menuItemService, currentUser);
+        ManageMenuView view = new ManageMenuView(menuItemService, shareService, currentUser);
 
         click(buttonByAriaLabel(view, "Edit A long walk"));
 
@@ -101,7 +109,7 @@ class ManageMenuViewTest {
         MenuItem water = item(Course.APPETIZER, "Water", null, false);
         when(menuItemService.ensureSeeded("user-1"))
                 .thenReturn(List.of(water), List.of());
-        ManageMenuView view = new ManageMenuView(menuItemService, currentUser);
+        ManageMenuView view = new ManageMenuView(menuItemService, shareService, currentUser);
 
         click(buttonByAriaLabel(view, "Remove Water"));
 
@@ -109,5 +117,89 @@ class ManageMenuViewTest {
         verify(menuItemService, times(2)).ensureSeeded("user-1");
         assertThat(hasText(view, "Water")).isFalse();
         assertThat(hasText(view, "Nothing on this course yet.")).isTrue();
+    }
+
+    @Test
+    void offersACreateLinkWithTheUsersNameWhenNoShareExists() {
+        when(menuItemService.ensureSeeded("user-1")).thenReturn(List.of());
+        ManageMenuView view = new ManageMenuView(menuItemService, shareService, currentUser);
+
+        assertThat(hasText(view, "Let someone borrow your menu.")).isTrue();
+        assertThat(hasText(view, "Create link")).isTrue();
+        assertThat(findAll(view, TextField.class))
+                .anyMatch(field -> "Micah".equals(field.getValue()));
+    }
+
+    @Test
+    void creatingALinkCallsTheServiceAndRerendersTheShare() {
+        when(menuItemService.ensureSeeded("user-1")).thenReturn(List.of());
+        MenuShare share = new MenuShare("user-1", "abcdefghijklmnopqrstuv", "Micah");
+        when(shareService.activeFor("user-1"))
+                .thenReturn(Optional.empty(), Optional.of(share));
+        ManageMenuView view = new ManageMenuView(menuItemService, shareService, currentUser);
+
+        click(button(view, "Create link"));
+
+        verify(shareService).create("user-1", "Micah");
+        verify(menuItemService, times(2)).ensureSeeded("user-1");
+        assertThat(findAll(view, TextField.class))
+                .anyMatch(field -> ("/m/" + share.getToken()).equals(field.getValue()));
+    }
+
+    @Test
+    void anActiveShareShowsTheLinkAndRevokesImmediately() {
+        when(menuItemService.ensureSeeded("user-1")).thenReturn(List.of());
+        MenuShare share = new MenuShare("user-1", "abcdefghijklmnopqrstuv", "Micah");
+        when(shareService.activeFor("user-1")).thenReturn(Optional.of(share));
+        ManageMenuView view = new ManageMenuView(menuItemService, shareService, currentUser);
+
+        assertThat(findAll(view, TextField.class))
+                .anyMatch(field -> ("/m/" + share.getToken()).equals(field.getValue()));
+        click(button(view, "Revoke link"));
+
+        verify(shareService).revoke("user-1", share.getId());
+        verify(menuItemService, times(2)).ensureSeeded("user-1");
+    }
+
+    @Test
+    void rotatingALinkUsesTheEditedAuthorName() {
+        when(menuItemService.ensureSeeded("user-1")).thenReturn(List.of());
+        MenuShare share = new MenuShare("user-1", "old-token", "Micah");
+        when(shareService.activeFor("user-1")).thenReturn(Optional.of(share));
+        ManageMenuView view = new ManageMenuView(menuItemService, shareService, currentUser);
+        TextField name = findAll(view, TextField.class).stream()
+                .filter(field -> "Micah".equals(field.getValue()))
+                .findFirst()
+                .orElseThrow();
+
+        name.setValue("Ada");
+        click(button(view, "Rotate link"));
+
+        verify(shareService).rotate("user-1", "Ada");
+    }
+
+    /**
+     * Value: protects=a blank author name blocks link creation and marks the field instead of
+     * calling the service; fails_when=validName's guard is bypassed and the blank/whitespace name
+     * reaches MenuShareService.create; why_new=the create test clicks with a prefilled valid name,
+     * so the empty-name path is never entered; seam=none; no_claim=does not cover the duplicate
+     * ActiveShareException branch.
+     */
+    @Test
+    void aBlankAuthorNameBlocksLinkCreationAndMarksTheField() {
+        when(menuItemService.ensureSeeded("user-1")).thenReturn(List.of());
+        ManageMenuView view = new ManageMenuView(menuItemService, shareService, currentUser);
+        TextField name = findAll(view, TextField.class).stream()
+                .filter(field -> "Micah".equals(field.getValue()))
+                .findFirst()
+                .orElseThrow();
+        name.setValue("   ");
+
+        click(button(view, "Create link"));
+
+        verify(shareService, never()).create(org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any());
+        assertThat(name.isInvalid()).isTrue();
+        assertThat(name.getErrorMessage()).isEqualTo("Add the name you want on the link.");
     }
 }

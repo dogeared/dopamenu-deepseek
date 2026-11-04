@@ -49,6 +49,13 @@ class PublicLayoutTest {
                 .orElseThrow();
         assertThat(login.getHref()).isEqualTo("/login");
         assertThat(login.getClassNames()).contains("btn", "btn-primary", "nav-login");
+
+        Anchor create = findAll(layout, Anchor.class).stream()
+                .filter(anchor -> "Create account".equals(anchor.getText()))
+                .findFirst()
+                .orElseThrow();
+        assertThat(create.getHref()).isEqualTo("/register");
+        assertThat(create.getClassNames()).contains("btn", "btn-ghost", "nav-create");
     }
 
     @Test

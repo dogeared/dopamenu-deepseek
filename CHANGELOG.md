@@ -5,7 +5,29 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.4] - 2026-11-04
+
+### Added
+
+- Public, anonymous menu pages at `/m/{token}`: a shared menu renders without an
+  account, marks itself `noindex`, and offers one-tap ordering plus "Copy this
+  menu" into a real account.
+- Share controls on the menu editor: create, copy, rotate and revoke one live
+  link per owner, with the author's name shown on the public page.
+- `/register` route and a "Create account" call to action on the public site;
+  the sign-in request asks Keycloak to open registration instead of login.
+- Token-attributed events (`share_view`, `order_started`, `order_completed`,
+  `menu_copied`) so a single link's funnel can be read from the database.
+
+### Changed
+
+- The Keycloak realm allows self-registration and uses the `dopamenu` login
+  theme, so someone arriving from a shared menu can create an account.
+- `mvn verify` now runs one HTTP-level test against a Testcontainers Postgres,
+  so it needs a working Docker daemon.
+- The Docker dev stack listens on port 8083 and reaches Keycloak by container
+  name, matching the shared local Keycloak and the dev reverse proxy. The
+  bundled realm also admits `localhost:8083` and the dev-proxy host.
 
 ## [0.1.3] - 2026-11-04
 

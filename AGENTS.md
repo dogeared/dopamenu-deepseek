@@ -25,7 +25,7 @@ Key routing rules:
 
 ## Project notes
 
-- Build: `mvn verify` (includes tests and the JaCoCo coverage gate).
+- Build: `mvn verify` (includes tests and the JaCoCo coverage gate; the HTTP-level test needs a running Docker daemon).
 - Run locally: `docker compose up -d db`, `docker compose -f compose.keycloak.yaml up -d`, then `mvn spring-boot:run`.
 - Version lives in `pom.xml`; record user-facing changes in `CHANGELOG.md`.
 - Keep application styles in `src/main/resources/META-INF/resources/styles/dopamenu.css`.
