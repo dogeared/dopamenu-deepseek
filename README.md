@@ -230,7 +230,8 @@ services:
   `http://` or to the container hostname.
 
 For the ingress route, the shared database, and the two-repo contract, see
-[`docs/deploy.md`](docs/deploy.md).
+[`docs/deploy.md`](docs/deploy.md). For the current manual deploy on the
+Synology NAS, see [`docs/deploy-synology.md`](docs/deploy-synology.md).
 
 ### 3. Create the production realm
 
@@ -397,7 +398,7 @@ src/main/resources/
   db/migration/  Flyway migrations
   META-INF/resources/styles/dopamenu.css
 keycloak/        importable dev realm + login theme
-docs/            designs, deploy contract, experiment protocol
+docs/            designs, deploy contract and NAS runbook, experiment protocol
 compose.yaml     app + Postgres
 compose.keycloak.yaml  optional dev Keycloak
 ```

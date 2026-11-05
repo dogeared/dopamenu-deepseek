@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   for a secret.
 - `docs/deploy.md` and the README now point at the production realm export; the
   development export `keycloak/realm-dopamenu.json` stays local-only.
+- `docs/deploy-synology.md` is the manual deploy runbook for the NAS. It covers
+  the `linux/amd64` rebuild, the image transfer, the realm and theme install, the
+  Container Manager project, the tunnel route and the host's `scp` and `sudo`
+  quirks.
 
 ## [0.1.4] - 2026-11-04
 

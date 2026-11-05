@@ -3,6 +3,9 @@
 This repository ships an application image, a Keycloak realm export and the
 database migrations. It does **not** own the public ingress.
 
+The step-by-step manual deploy on the Synology NAS, with its host-specific
+quirks, lives in [`deploy-synology.md`](deploy-synology.md).
+
 Since 2026-11-04 the Cloudflare tunnel and the central Keycloak live in
 `~/Projects/dogeared-central-infra` (one compose project, `central`, on the
 `tnra-shared` Docker network). The earlier plan in
