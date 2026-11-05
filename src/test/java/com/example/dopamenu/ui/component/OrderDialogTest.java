@@ -10,6 +10,7 @@ import com.example.dopamenu.ui.Dialogs;
 import com.example.dopamenu.ui.UiTestSupport;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +26,7 @@ import static com.example.dopamenu.ui.UiTestSupport.findOne;
 import static com.example.dopamenu.ui.UiTestSupport.hasText;
 import static com.example.dopamenu.ui.UiTestSupport.setField;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -176,9 +178,46 @@ class OrderDialogTest {
         findOne(dialog, TextArea.class).setValue("Worth it");
         click(button(dialog, "Log it"));
 
-        verify(orderService).complete("user-1", null, 2, "Worth it");
+        verify(orderService).complete("user-1", null, 2, "Worth it", 1);
         verify(onChanged).run();
         assertThat(dialog.isOpened()).isFalse();
+    }
+
+    @Test
+    void theFinishFormPrefillsTheClockAndAcceptsACorrection() {
+        MenuOrder running = new MenuOrder("user-1",
+                item(Course.ENTREE, "A long walk", 45), 2);
+        setField(running, "startedAt", Instant.now().minus(40, ChronoUnit.MINUTES));
+        OrderDialog dialog = new OrderDialog(running, orderService, currentUser, onChanged);
+        Dialogs.open(dialog);
+
+        click(button(dialog, "I'm done"));
+
+        IntegerField minutesSpent = findOne(dialog, IntegerField.class);
+        assertThat(minutesSpent.getValue()).isEqualTo(40);
+
+        minutesSpent.setValue(52);
+        click(button(dialog, "Log it"));
+
+        verify(orderService).complete("user-1", null, 2, "", 52);
+    }
+
+    @Test
+    void anInvalidCorrectionKeepsTheFinishFormOpen() {
+        MenuOrder running = new MenuOrder("user-1",
+                item(Course.ENTREE, "A long walk", 45), 2);
+        OrderDialog dialog = new OrderDialog(running, orderService, currentUser, onChanged);
+        Dialogs.open(dialog);
+
+        click(button(dialog, "I'm done"));
+        IntegerField minutesSpent = findOne(dialog, IntegerField.class);
+        minutesSpent.clear();
+        click(button(dialog, "Log it"));
+
+        verify(orderService, never()).complete(org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any(), anyInt(), any(), any());
+        assertThat(minutesSpent.isInvalid()).isTrue();
+        assertThat(dialog.isOpened()).isTrue();
     }
 
     @Test

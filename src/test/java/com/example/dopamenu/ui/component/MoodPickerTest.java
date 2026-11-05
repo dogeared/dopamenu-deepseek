@@ -89,9 +89,9 @@ class MoodPickerTest {
     }
 
     @Test
-    void loggingAPastItemInvokesTheCallback() {
-        MenuItem item = new MenuItem("user-1", Course.APPETIZER, "Water", null,
-                2, DopamineLevel.GENTLE, false);
+    void loggingAPastTimerItemInvokesTheCallback() {
+        MenuItem item = new MenuItem("user-1", Course.DESSERT, "One video", null,
+                10, DopamineLevel.INTENSE, true);
         List<MenuItem> logged = new ArrayList<>();
         MenuItemCard card = new MenuItemCard(item, ignored -> {
         }, logged::add);
@@ -103,9 +103,21 @@ class MoodPickerTest {
 
     @Test
     void cardsWithoutALogCallbackHideThePastAction() {
-        MenuItem item = new MenuItem("user-1", Course.APPETIZER, "Water", null,
-                2, DopamineLevel.GENTLE, false);
+        MenuItem item = new MenuItem("user-1", Course.DESSERT, "One video", null,
+                10, DopamineLevel.INTENSE, true);
         MenuItemCard card = new MenuItemCard(item, ignored -> {
+        });
+
+        assertThat(hasText(card, "Log it")).isFalse();
+        assertThat(hasText(card, "Order")).isTrue();
+    }
+
+    @Test
+    void untimedCardsHideThePastActionBecauseOrderIsTheForm() {
+        MenuItem item = new MenuItem("user-1", Course.ENTREE, "A long walk", null,
+                45, DopamineLevel.BRIGHT, false);
+        MenuItemCard card = new MenuItemCard(item, ignored -> {
+        }, ignored -> {
         });
 
         assertThat(hasText(card, "Log it")).isFalse();

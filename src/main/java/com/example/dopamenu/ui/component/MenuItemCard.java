@@ -21,8 +21,10 @@ public class MenuItemCard extends Article {
     }
 
     /**
-     * @param onLog opens the after-the-fact logging flow. {@code null} hides
-     *              that action, which is what the public share page wants.
+     * @param onLog opens the after-the-fact logging flow for timer dishes.
+     *              {@code null} hides that action, which is what the public
+     *              share page wants. Untimed dishes hide it too: their Order
+     *              action already opens the minutes form.
      */
     public MenuItemCard(MenuItem item, Consumer<MenuItem> onOrder, Consumer<MenuItem> onLog) {
         addClassName("menu-card");
@@ -55,7 +57,9 @@ public class MenuItemCard extends Article {
 
         Div footer = new Div();
         footer.addClassName("card-footer");
-        if (onLog != null) {
+        // Without a timer, Order already opens the minutes form, so a second
+        // "Log it" action would just repeat it.
+        if (onLog != null && item.isTimerRequired()) {
             NativeButton log = new NativeButton("Log it");
             Css.add(log, "btn", "btn-quiet", "card-log");
             log.setAriaLabel("Log " + item.getTitle() + " after the fact");

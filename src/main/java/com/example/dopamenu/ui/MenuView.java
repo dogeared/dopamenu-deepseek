@@ -78,8 +78,7 @@ public class MenuView extends VerticalLayout implements AfterNavigationObserver 
         shareService.copyOne(owner, intent.token(), intent.itemId())
                 .ifPresentOrElse(item -> {
                     render();
-                    Dialogs.open(new OrderDialog(item, orderService, currentUser,
-                            this::render));
+                    openOrder(item);
                 }, () -> notice("That dish is no longer on the menu."));
     }
 
@@ -100,7 +99,7 @@ public class MenuView extends VerticalLayout implements AfterNavigationObserver 
             List<MenuItem> courseItems = items.stream()
                     .filter(item -> item.getCourse() == course)
                     .toList();
-            add(new CourseSection(course, courseItems, this::order, this::log, true));
+            add(new CourseSection(course, courseItems, this::openOrder, this::log, true));
         }
 
         add(footer());
@@ -181,8 +180,15 @@ public class MenuView extends VerticalLayout implements AfterNavigationObserver 
         return new SiteFooter();
     }
 
-    private void order(MenuItem item) {
-        Dialogs.open(new OrderDialog(item, orderService, currentUser, this::render));
+    /**
+     * A dish that pairs with a timer starts the countdown. Everything else
+     * goes straight to the minutes form, because there is no clock worth
+     * watching.
+     */
+    private void openOrder(MenuItem item) {
+        Dialogs.open(item.isTimerRequired()
+                ? new OrderDialog(item, orderService, currentUser, this::render)
+                : new LogPastDialog(item, orderService, currentUser, this::render));
     }
 
     private void log(MenuItem item) {

@@ -23,6 +23,9 @@ import com.vaadin.flow.component.textfield.TextField;
  */
 public class MenuItemFormDialog extends Dialog {
 
+    private static final String TIMER_HELPER =
+            "Checked: run a timer. Unchecked: log the minutes when you're done.";
+
     private final MenuItemService menuItemService;
     private final String ownerSub;
     private final MenuItem existing;
@@ -75,6 +78,7 @@ public class MenuItemFormDialog extends Dialog {
         description.setMinRows(3);
         description.addClassName("field-full");
         timer.addClassName("field-full");
+        timer.setHelperText(TIMER_HELPER);
 
         course.setLabel("Course");
         course.setItems(Course.values());
@@ -103,7 +107,7 @@ public class MenuItemFormDialog extends Dialog {
                 timer.setValue(true);
                 timer.setHelperText("Desserts are always time-boxed.");
             } else {
-                timer.setHelperText(null);
+                timer.setHelperText(TIMER_HELPER);
             }
         });
 

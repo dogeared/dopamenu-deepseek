@@ -71,12 +71,26 @@ public class MenuOrderService {
 
     @Transactional
     public MenuOrder complete(String ownerSub, UUID orderId, int moodAfter, String note) {
+        return complete(ownerSub, orderId, moodAfter, note, null);
+    }
+
+    /**
+     * Completes a timed order, optionally replacing the clock's measurement
+     * with the minutes the user reported.
+     */
+    @Transactional
+    public MenuOrder complete(String ownerSub, UUID orderId, int moodAfter, String note,
+            Integer actualMinutes) {
+        if (actualMinutes != null && actualMinutes < 1) {
+            throw new IllegalArgumentException("Minutes must be at least one");
+        }
         MenuOrder order = orderRepository.findByIdAndOwnerSub(orderId, ownerSub)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found"));
         if (order.getStatus() != OrderStatus.ACTIVE) {
             return order;
         }
-        order.complete(moodAfter, note == null || note.isBlank() ? null : note.trim());
+        order.complete(moodAfter, note == null || note.isBlank() ? null : note.trim(),
+                actualMinutes);
         events.record(MenuEvent.Kind.ORDER_COMPLETED, ownerSub, order.getShareToken(),
                 order.getId(), null);
         return order;

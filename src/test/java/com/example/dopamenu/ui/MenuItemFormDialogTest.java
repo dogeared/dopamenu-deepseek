@@ -160,7 +160,8 @@ class MenuItemFormDialogTest {
 
         course(dialog).setValue(Course.SIDE);
 
-        assertThat(timer(dialog).getHelperText()).isNull();
+        assertThat(timer(dialog).getHelperText())
+                .isEqualTo("Checked: run a timer. Unchecked: log the minutes when you're done.");
     }
 
     @Test

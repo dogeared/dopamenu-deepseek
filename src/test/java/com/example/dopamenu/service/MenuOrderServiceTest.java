@@ -167,6 +167,27 @@ class MenuOrderServiceTest {
     }
 
     @Test
+    void completeKeepsTheDurationTheUserCorrected() {
+        MenuOrder order = new MenuOrder("user-1", item(), 2);
+        UUID orderId = UUID.randomUUID();
+        when(orderRepository.findByIdAndOwnerSub(orderId, "user-1"))
+                .thenReturn(Optional.of(order));
+
+        MenuOrder completed = service.complete("user-1", orderId, 5, null, 52);
+
+        assertThat(completed.getActualMinutes()).isEqualTo(52);
+        assertThat(completed.minutesElapsed()).isEqualTo(52);
+    }
+
+    @Test
+    void completeRejectsACorrectedDurationBelowOneMinute() {
+        assertThatThrownBy(() -> service.complete("user-1", UUID.randomUUID(), 5, null, 0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Minutes must be at least one");
+        verify(orderRepository, never()).findByIdAndOwnerSub(any(), any());
+    }
+
+    @Test
     void completeLeavesAlreadyFinishedOrdersUntouched() {
         MenuOrder order = new MenuOrder("user-1", item(), 2);
         order.complete(4, "first");

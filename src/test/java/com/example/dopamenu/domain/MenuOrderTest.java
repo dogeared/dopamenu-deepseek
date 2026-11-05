@@ -88,6 +88,28 @@ class MenuOrderTest {
     }
 
     @Test
+    void completingWithACorrectedDurationKeepsTheReportedMinutes() {
+        MenuOrder order = new MenuOrder("user-1", item(), 2);
+
+        order.complete(5, "Took longer", 52);
+
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.COMPLETED);
+        assertThat(order.getActualMinutes()).isEqualTo(52);
+        assertThat(order.minutesElapsed()).isEqualTo(52);
+        assertThat(order.isRetroactive()).isFalse();
+    }
+
+    @Test
+    void aCorrectedDurationNeedsAtLeastOneMinute() {
+        MenuOrder order = new MenuOrder("user-1", item(), 2);
+
+        assertThatThrownBy(() -> order.complete(5, null, 0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Minutes must be at least one");
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.ACTIVE);
+    }
+
+    @Test
     void aTimedOrderIsNotRetroactiveAndDerivesItsMinutes() {
         MenuOrder order = new MenuOrder("user-1", item(), 2);
 

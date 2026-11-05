@@ -15,8 +15,9 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
 
 /**
- * Logs an order that already happened, such as a walk taken an hour ago. The
- * user reports the minutes spent, so no timer is involved.
+ * Logs an order off the clock, either one that already happened or an untimed
+ * dish the user just finished. The user reports the minutes spent, so no timer
+ * is involved.
  */
 public class LogPastDialog extends Dialog {
 
@@ -27,7 +28,7 @@ public class LogPastDialog extends Dialog {
 
     private final IntegerField minutes = new IntegerField("Minutes spent");
     private final MoodPicker moodBefore = new MoodPicker("How were you feeling before?", 3);
-    private final MoodPicker moodAfter = new MoodPicker("How do you feel now?", 4);
+    private final MoodPicker moodAfter = new MoodPicker("How do you feel now?", 3);
     private final TextArea note = new TextArea("What did it give you?");
 
     public LogPastDialog(MenuItem item, MenuOrderService orderService,
@@ -50,12 +51,12 @@ public class LogPastDialog extends Dialog {
 
         Div head = new Div();
         head.addClassName("dialog-head");
-        Span eyebrow = new Span("Already did this one?");
+        Span eyebrow = new Span("Off the clock");
         eyebrow.addClassName("eyebrow");
         H2 heading = new H2(item.getTitle());
         heading.addClassName("dialog-title");
-        Span hint = new Span("Log it after the fact. No timer — just the minutes you "
-                + "actually spent.");
+        Span hint = new Span("No timer. Enter the minutes you actually spent — just now "
+                + "or earlier today.");
         hint.addClassName("dialog-subtitle");
         head.add(eyebrow, heading, hint);
 

@@ -161,8 +161,20 @@ public class MenuOrder {
     }
 
     public void complete(int moodAfter, String note) {
+        complete(moodAfter, note, null);
+    }
+
+    /**
+     * @param actualMinutes the minutes the user corrected after the timer ran,
+     *                      or null to keep the clock's own measurement.
+     */
+    public void complete(int moodAfter, String note, Integer actualMinutes) {
+        if (actualMinutes != null && actualMinutes < 1) {
+            throw new IllegalArgumentException("Minutes must be at least one");
+        }
         this.status = OrderStatus.COMPLETED;
         this.endedAt = Instant.now();
+        this.actualMinutes = actualMinutes;
         this.moodAfter = moodAfter;
         this.note = note;
     }

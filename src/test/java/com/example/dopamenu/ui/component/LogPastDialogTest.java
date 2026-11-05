@@ -52,7 +52,7 @@ class LogPastDialogTest {
         LogPastDialog dialog = new LogPastDialog(item(45), orderService, currentUser,
                 onChanged);
 
-        assertThat(hasText(dialog, "Already did this one?")).isTrue();
+        assertThat(hasText(dialog, "Off the clock")).isTrue();
         assertThat(hasText(dialog, "A long walk")).isTrue();
         assertThat(hasText(dialog, "No timer")).isTrue();
         assertThat(hasText(dialog, "How were you feeling before?")).isTrue();
@@ -70,7 +70,7 @@ class LogPastDialogTest {
         findOne(dialog, TextArea.class).setValue("Took the long loop");
         click(button(dialog, "Add to history"));
 
-        verify(orderService).logPast("user-1", item.getId(), 40, 3, 4,
+        verify(orderService).logPast("user-1", item.getId(), 40, 3, 3,
                 "Took the long loop");
         verify(onChanged).run();
         assertThat(dialog.isOpened()).isFalse();
