@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-11-05
+
+### Added
+
+- **Log a dish you already finished.** Every menu card now has a **Log it**
+  action beside **Order**. It opens a short form for the minutes you actually
+  spent, with the before/after moods and an optional note, and writes a
+  completed order straight to your history. No timer runs, and it works even
+  while another timer is going.
+- Retroactive orders carry a **Logged** pill in History and show the minutes
+  you reported, so they read differently from timed orders.
+
 ## [0.1.6] - 2026-11-05
 
 ### Added

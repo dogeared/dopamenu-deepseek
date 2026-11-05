@@ -189,7 +189,7 @@ production profile, runs as an unprivileged user, listens on `8080`, and serves
 
 ```bash
 mvn -Pproduction verify        # tests + coverage gate; needs Docker for Testcontainers
-docker build -t dopamenu:0.1.6 .
+docker build -t dopamenu:0.2.0 .
 ```
 
 `mvn -Pproduction package` produces the same jar without the tests when CI has
@@ -204,7 +204,7 @@ The app needs a Postgres 17 database and the Keycloak settings in sections 3–6
 ```yaml
 services:
   app:
-    image: dopamenu:0.1.6
+    image: dopamenu:0.2.0
     restart: unless-stopped
     ports: ["8080:8080"]      # omit when the ingress joins this network instead
     environment:
@@ -381,7 +381,7 @@ framework wiring (`SecurityConfig`, `AppShell`, `DopaMenuApplication`) is exclud
 from the coverage gate; domain, service, configuration, and the Vaadin UI
 components are all measured.
 
-The production build writes `target/dopamenu-0.1.6.jar`; the Dockerfile uses it in a
+The production build writes `target/dopamenu-0.2.0.jar`; the Dockerfile uses it in a
 multi-stage build.
 
 ### Project layout

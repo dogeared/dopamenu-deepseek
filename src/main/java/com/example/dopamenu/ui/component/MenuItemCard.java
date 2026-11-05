@@ -9,6 +9,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.example.dopamenu.domain.MenuItem;
+import com.example.dopamenu.ui.Css;
 import com.example.dopamenu.ui.UiText;
 
 import java.util.function.Consumer;
@@ -16,6 +17,14 @@ import java.util.function.Consumer;
 public class MenuItemCard extends Article {
 
     public MenuItemCard(MenuItem item, Consumer<MenuItem> onOrder) {
+        this(item, onOrder, null);
+    }
+
+    /**
+     * @param onLog opens the after-the-fact logging flow. {@code null} hides
+     *              that action, which is what the public share page wants.
+     */
+    public MenuItemCard(MenuItem item, Consumer<MenuItem> onOrder, Consumer<MenuItem> onLog) {
         addClassName("menu-card");
         addClassName("strength-" + item.getDopamineLevel().name().toLowerCase());
 
@@ -46,6 +55,14 @@ public class MenuItemCard extends Article {
 
         Div footer = new Div();
         footer.addClassName("card-footer");
+        if (onLog != null) {
+            NativeButton log = new NativeButton("Log it");
+            Css.add(log, "btn", "btn-quiet", "card-log");
+            log.setAriaLabel("Log " + item.getTitle() + " after the fact");
+            log.setTitle("Already did this one? Add it to your history.");
+            log.addClickListener(event -> onLog.accept(item));
+            footer.add(log);
+        }
         NativeButton order = new NativeButton();
         order.addClassName("card-action");
         order.add(new Span("Order"));

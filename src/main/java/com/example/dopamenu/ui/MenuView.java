@@ -10,6 +10,7 @@ import com.example.dopamenu.service.MenuShareService;
 import com.example.dopamenu.service.OrderStats;
 import com.example.dopamenu.service.ShareIntent;
 import com.example.dopamenu.ui.component.CourseSection;
+import com.example.dopamenu.ui.component.LogPastDialog;
 import com.example.dopamenu.ui.component.OrderDialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -99,7 +100,7 @@ public class MenuView extends VerticalLayout implements AfterNavigationObserver 
             List<MenuItem> courseItems = items.stream()
                     .filter(item -> item.getCourse() == course)
                     .toList();
-            add(new CourseSection(course, courseItems, this::order));
+            add(new CourseSection(course, courseItems, this::order, this::log, true));
         }
 
         add(footer());
@@ -182,6 +183,10 @@ public class MenuView extends VerticalLayout implements AfterNavigationObserver 
 
     private void order(MenuItem item) {
         Dialogs.open(new OrderDialog(item, orderService, currentUser, this::render));
+    }
+
+    private void log(MenuItem item) {
+        Dialogs.open(new LogPastDialog(item, orderService, currentUser, this::render));
     }
 
     private void resume(MenuOrder order) {

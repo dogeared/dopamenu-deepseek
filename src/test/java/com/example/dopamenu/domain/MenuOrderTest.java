@@ -3,6 +3,7 @@ package com.example.dopamenu.domain;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class MenuOrderTest {
 
@@ -68,5 +69,43 @@ class MenuOrderTest {
         MenuOrder order = new MenuOrder("user-1", item(), 3);
 
         assertThat(order.minutesElapsed()).isGreaterThanOrEqualTo(0);
+    }
+
+    @Test
+    void loggingAPastOrderKeepsTheMinutesTheUserReported() {
+        MenuOrder order = new MenuOrder("user-1", item(), 2);
+
+        order.logPast(40, 4, "Walked the loop");
+
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.COMPLETED);
+        assertThat(order.isRetroactive()).isTrue();
+        assertThat(order.getActualMinutes()).isEqualTo(40);
+        assertThat(order.minutesElapsed()).isEqualTo(40);
+        assertThat(order.getEndedAt()).isNotNull();
+        assertThat(order.getMoodAfter()).isEqualTo(4);
+        assertThat(order.getNote()).isEqualTo("Walked the loop");
+        assertThat(order.moodLift()).isEqualTo(2);
+    }
+
+    @Test
+    void aTimedOrderIsNotRetroactiveAndDerivesItsMinutes() {
+        MenuOrder order = new MenuOrder("user-1", item(), 2);
+
+        order.complete(5, null);
+
+        assertThat(order.isRetroactive()).isFalse();
+        assertThat(order.getActualMinutes()).isNull();
+        assertThat(order.minutesElapsed()).isLessThanOrEqualTo(1);
+    }
+
+    @Test
+    void loggingAPastOrderNeedsAtLeastOneMinute() {
+        MenuOrder order = new MenuOrder("user-1", item(), 2);
+
+        assertThatThrownBy(() -> order.logPast(0, 4, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Minutes must be at least one");
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.ACTIVE);
+        assertThat(order.isRetroactive()).isFalse();
     }
 }

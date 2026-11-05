@@ -109,6 +109,25 @@ class HistoryViewTest {
     }
 
     @Test
+    void aRetroactiveOrderShowsTheReportedMinutesAndALoggedPill() {
+        MenuItem walk = new MenuItem("user-1", Course.ENTREE, "A long walk", null,
+                45, DopamineLevel.BRIGHT, false);
+        MenuOrder walked = new MenuOrder("user-1", walk, 3);
+        walked.logPast(40, 5, null);
+        when(orderService.stats("user-1", 7)).thenReturn(stats());
+        when(orderService.recentOrders("user-1")).thenReturn(List.of(walked));
+
+        HistoryView view = new HistoryView(orderService, currentUser);
+
+        assertThat(hasText(view, "Logged")).isTrue();
+        assertThat(hasText(view, "40 min spent")).isTrue();
+        assertThat(findAll(view, Span.class))
+                .filteredOn(span -> span.getClassNames().contains("status-retroactive"))
+                .extracting(Span::getText)
+                .containsExactly("Logged");
+    }
+
+    @Test
     void aSingleEntryUsesTheSingularLabel() {
         MenuOrder completed = order(Course.ENTREE, "A long walk", 3, 3, null);
         when(orderService.stats("user-1", 7)).thenReturn(stats());

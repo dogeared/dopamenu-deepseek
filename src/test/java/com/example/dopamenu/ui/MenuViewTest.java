@@ -12,6 +12,7 @@ import com.example.dopamenu.service.MenuShareService;
 import com.example.dopamenu.service.OrderStats;
 import com.example.dopamenu.service.ShareIntent;
 import com.example.dopamenu.ui.component.CourseSection;
+import com.example.dopamenu.ui.component.LogPastDialog;
 import com.example.dopamenu.ui.component.MenuItemCard;
 import com.example.dopamenu.ui.component.OrderDialog;
 import com.vaadin.flow.component.UI;
@@ -140,6 +141,23 @@ class MenuViewTest {
                 .hasSize(1)
                 .first()
                 .isInstanceOf(OrderDialog.class);
+    }
+
+    @Test
+    void loggingAPastDishOpensTheAfterTheFactDialog() {
+        MenuItem item = item(Course.APPETIZER, "Water");
+        when(menuItemService.ensureSeeded("user-1")).thenReturn(List.of(item));
+        when(orderService.stats("user-1", 7)).thenReturn(stats());
+        when(orderService.activeOrder("user-1")).thenReturn(Optional.empty());
+        MenuView view = new MenuView(menuItemService, orderService, shareService,
+                currentUser);
+
+        click(button(view, "Log it"));
+
+        assertThat(findAll(UI.getCurrent(), Dialog.class))
+                .hasSize(1)
+                .first()
+                .isInstanceOf(LogPastDialog.class);
     }
 
     @Test
