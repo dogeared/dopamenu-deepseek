@@ -176,6 +176,21 @@ behind, delete it first and repeat the create:
 docker exec keycloak-central /opt/keycloak/bin/kcadm.sh delete realms/dopamenu
 ```
 
+Verify the client through the single-client endpoint. The list query
+(`get clients -q clientId=...`) does not populate client attributes and always
+reports an empty map, which makes a correct realm look broken:
+
+```bash
+CID=$(docker exec keycloak-central /opt/keycloak/bin/kcadm.sh get clients \
+  -r dopamenu -q clientId=dopamenu-app --fields id --format csv --noquotes)
+
+docker exec keycloak-central /opt/keycloak/bin/kcadm.sh get clients/$CID -r dopamenu \
+  | grep -E '"clientId"|"publicClient"|"redirectUris"|pkce|post.logout'
+```
+
+Expect `publicClient` true, the production redirect URI, and both
+`pkce.code.challenge.method` and `post.logout.redirect.uris` present.
+
 Recreate Keycloak so it picks up the new theme mount:
 
 ```bash
