@@ -142,10 +142,16 @@ public class HistoryView extends VerticalLayout {
         Span status = new Span(statusLabel(order.getStatus()));
         Css.add(status, "status-pill", "status-" + order.getStatus().name().toLowerCase());
         line.add(title, status);
+        if (order.isRetroactive()) {
+            Span logged = new Span("Logged");
+            Css.add(logged, "status-pill", "status-retroactive");
+            line.add(logged);
+        }
 
         Div meta = new Div();
         meta.addClassName("order-meta");
-        meta.add(new Span(UiText.day(order.getStartedAt()) + " · "
+        meta.add(new Span((order.isRetroactive() ? "Added " : "")
+                + UiText.day(order.getStartedAt()) + " · "
                 + UiText.time(order.getStartedAt())));
         meta.add(new Span(order.getCourse().label()));
         meta.add(new Span(UiText.minutes(order.minutesElapsed()) + " spent"));

@@ -48,14 +48,49 @@ public class MenuOrderService {
         return order;
     }
 
+    /**
+     * Logs an order that already happened, with the minutes the user reports.
+     * It does not touch a running timer: logging yesterday's walk while today's
+     * timer is going is a perfectly reasonable thing to do.
+     */
+    @Transactional
+    public MenuOrder logPast(String ownerSub, UUID itemId, int minutes, int moodBefore,
+            int moodAfter, String note) {
+        if (minutes < 1) {
+            throw new IllegalArgumentException("Minutes must be at least one");
+        }
+        MenuItem item = itemRepository.findByIdAndOwnerSub(itemId, ownerSub)
+                .orElseThrow(() -> new IllegalArgumentException("Menu item not found"));
+        MenuOrder order = new MenuOrder(ownerSub, item, moodBefore);
+        order.logPast(minutes, moodAfter, note == null || note.isBlank() ? null : note.trim());
+        orderRepository.save(order);
+        events.record(MenuEvent.Kind.ORDER_COMPLETED, ownerSub, item.getSourceShareToken(),
+                order.getId(), null);
+        return order;
+    }
+
     @Transactional
     public MenuOrder complete(String ownerSub, UUID orderId, int moodAfter, String note) {
+        return complete(ownerSub, orderId, moodAfter, note, null);
+    }
+
+    /**
+     * Completes a timed order, optionally replacing the clock's measurement
+     * with the minutes the user reported.
+     */
+    @Transactional
+    public MenuOrder complete(String ownerSub, UUID orderId, int moodAfter, String note,
+            Integer actualMinutes) {
+        if (actualMinutes != null && actualMinutes < 1) {
+            throw new IllegalArgumentException("Minutes must be at least one");
+        }
         MenuOrder order = orderRepository.findByIdAndOwnerSub(orderId, ownerSub)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found"));
         if (order.getStatus() != OrderStatus.ACTIVE) {
             return order;
         }
-        order.complete(moodAfter, note == null || note.isBlank() ? null : note.trim());
+        order.complete(moodAfter, note == null || note.isBlank() ? null : note.trim(),
+                actualMinutes);
         events.record(MenuEvent.Kind.ORDER_COMPLETED, ownerSub, order.getShareToken(),
                 order.getId(), null);
         return order;

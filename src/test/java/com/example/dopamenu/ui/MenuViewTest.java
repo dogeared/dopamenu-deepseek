@@ -12,6 +12,7 @@ import com.example.dopamenu.service.MenuShareService;
 import com.example.dopamenu.service.OrderStats;
 import com.example.dopamenu.service.ShareIntent;
 import com.example.dopamenu.ui.component.CourseSection;
+import com.example.dopamenu.ui.component.LogPastDialog;
 import com.example.dopamenu.ui.component.MenuItemCard;
 import com.example.dopamenu.ui.component.OrderDialog;
 import com.vaadin.flow.component.UI;
@@ -126,8 +127,8 @@ class MenuViewTest {
     }
 
     @Test
-    void orderingADishOpensTheOrderDialog() {
-        MenuItem item = item(Course.APPETIZER, "Water");
+    void orderingATimerDishOpensTheOrderDialog() {
+        MenuItem item = item(Course.DESSERT, "One video");
         when(menuItemService.ensureSeeded("user-1")).thenReturn(List.of(item));
         when(orderService.stats("user-1", 7)).thenReturn(stats());
         when(orderService.activeOrder("user-1")).thenReturn(Optional.empty());
@@ -140,6 +141,40 @@ class MenuViewTest {
                 .hasSize(1)
                 .first()
                 .isInstanceOf(OrderDialog.class);
+    }
+
+    @Test
+    void orderingAnUntimedDishOpensTheMinutesForm() {
+        MenuItem item = item(Course.ENTREE, "A long walk");
+        when(menuItemService.ensureSeeded("user-1")).thenReturn(List.of(item));
+        when(orderService.stats("user-1", 7)).thenReturn(stats());
+        when(orderService.activeOrder("user-1")).thenReturn(Optional.empty());
+        MenuView view = new MenuView(menuItemService, orderService, shareService,
+                currentUser);
+
+        click(button(view, "Order"));
+
+        assertThat(findAll(UI.getCurrent(), Dialog.class))
+                .hasSize(1)
+                .first()
+                .isInstanceOf(LogPastDialog.class);
+    }
+
+    @Test
+    void loggingAPastTimerDishOpensTheAfterTheFactDialog() {
+        MenuItem item = item(Course.DESSERT, "One video");
+        when(menuItemService.ensureSeeded("user-1")).thenReturn(List.of(item));
+        when(orderService.stats("user-1", 7)).thenReturn(stats());
+        when(orderService.activeOrder("user-1")).thenReturn(Optional.empty());
+        MenuView view = new MenuView(menuItemService, orderService, shareService,
+                currentUser);
+
+        click(button(view, "Log it"));
+
+        assertThat(findAll(UI.getCurrent(), Dialog.class))
+                .hasSize(1)
+                .first()
+                .isInstanceOf(LogPastDialog.class);
     }
 
     @Test
@@ -177,8 +212,8 @@ class MenuViewTest {
 
     @Test
     void anOrderIntentCopiesExactlyOneItemAndOpensTheBeforeDialog() {
-        MenuItem item = item(Course.ENTREE, "A long walk");
-        MenuItem copied = item(Course.ENTREE, "A long walk");
+        MenuItem item = item(Course.DESSERT, "One video");
+        MenuItem copied = item(Course.DESSERT, "One video");
         UUID sourceId = UUID.randomUUID();
         when(menuItemService.ensureSeeded("user-1")).thenReturn(List.of(item));
         when(orderService.stats("user-1", 7)).thenReturn(stats());

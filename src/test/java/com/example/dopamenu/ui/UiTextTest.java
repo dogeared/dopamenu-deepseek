@@ -3,7 +3,6 @@ package com.example.dopamenu.ui;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -58,7 +57,10 @@ class UiTextTest {
     @Test
     void labelsTodayYesterdayAndOlderDays() {
         Instant tenDaysAgo = Instant.now().minus(10, ChronoUnit.DAYS);
-        String expected = LocalDate.now().minusDays(10).format(DAY);
+        // Derive the expected day from the same instant: subtracting fixed
+        // 24-hour periods crosses a DST boundary, where LocalDate.now() does
+        // not, and the two disagree by a day.
+        String expected = tenDaysAgo.atZone(ZoneId.systemDefault()).toLocalDate().format(DAY);
 
         assertThat(UiText.day(Instant.now())).isEqualTo("Today");
         assertThat(UiText.day(Instant.now().minus(1, ChronoUnit.DAYS)))

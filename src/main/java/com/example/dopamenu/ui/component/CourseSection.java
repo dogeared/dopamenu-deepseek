@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 public class CourseSection extends Div {
 
     public CourseSection(Course course, List<MenuItem> items, Consumer<MenuItem> onOrder) {
-        this(course, items, onOrder, true);
+        this(course, items, onOrder, null, true);
     }
 
     /**
@@ -27,6 +27,15 @@ public class CourseSection extends Div {
      */
     public CourseSection(Course course, List<MenuItem> items, Consumer<MenuItem> onOrder,
             boolean linkToManage) {
+        this(course, items, onOrder, null, linkToManage);
+    }
+
+    /**
+     * @param onLog opens the after-the-fact logging flow for a card. Pass
+     *              {@code null} to leave the cards with only the order action.
+     */
+    public CourseSection(Course course, List<MenuItem> items, Consumer<MenuItem> onOrder,
+            Consumer<MenuItem> onLog, boolean linkToManage) {
         addClassName("course-section");
         addClassName("course-" + course.cssName());
 
@@ -68,7 +77,7 @@ public class CourseSection extends Div {
             }
             grid.add(empty);
         } else {
-            items.forEach(item -> grid.add(new MenuItemCard(item, onOrder)));
+            items.forEach(item -> grid.add(new MenuItemCard(item, onOrder, onLog)));
         }
         add(grid);
     }

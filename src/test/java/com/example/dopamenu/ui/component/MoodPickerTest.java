@@ -89,6 +89,42 @@ class MoodPickerTest {
     }
 
     @Test
+    void loggingAPastTimerItemInvokesTheCallback() {
+        MenuItem item = new MenuItem("user-1", Course.DESSERT, "One video", null,
+                10, DopamineLevel.INTENSE, true);
+        List<MenuItem> logged = new ArrayList<>();
+        MenuItemCard card = new MenuItemCard(item, ignored -> {
+        }, logged::add);
+
+        click(UiTestSupport.button(card, "Log it"));
+
+        assertThat(logged).containsExactly(item);
+    }
+
+    @Test
+    void cardsWithoutALogCallbackHideThePastAction() {
+        MenuItem item = new MenuItem("user-1", Course.DESSERT, "One video", null,
+                10, DopamineLevel.INTENSE, true);
+        MenuItemCard card = new MenuItemCard(item, ignored -> {
+        });
+
+        assertThat(hasText(card, "Log it")).isFalse();
+        assertThat(hasText(card, "Order")).isTrue();
+    }
+
+    @Test
+    void untimedCardsHideThePastActionBecauseOrderIsTheForm() {
+        MenuItem item = new MenuItem("user-1", Course.ENTREE, "A long walk", null,
+                45, DopamineLevel.BRIGHT, false);
+        MenuItemCard card = new MenuItemCard(item, ignored -> {
+        }, ignored -> {
+        });
+
+        assertThat(hasText(card, "Log it")).isFalse();
+        assertThat(hasText(card, "Order")).isTrue();
+    }
+
+    @Test
     void cardShowsDescriptionTimerAndStrength() {
         MenuItem item = new MenuItem("user-1", Course.DESSERT, "One video",
                 "Not the next one", 10, DopamineLevel.INTENSE, true);

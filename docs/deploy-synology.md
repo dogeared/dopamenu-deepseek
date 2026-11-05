@@ -47,10 +47,10 @@ optional.
 ```bash
 cd ~/Projects/dopamenu-deepseek
 
-docker buildx build --platform linux/amd64 --load -t dopamenu:0.1.6 .
-# without buildx: docker build --platform linux/amd64 -t dopamenu:0.1.6 .
+docker buildx build --platform linux/amd64 --load -t dopamenu:0.2.0 .
+# without buildx: docker build --platform linux/amd64 -t dopamenu:0.2.0 .
 
-docker image inspect dopamenu:0.1.6 --format '{{.Os}}/{{.Architecture}}'
+docker image inspect dopamenu:0.2.0 --format '{{.Os}}/{{.Architecture}}'
 ```
 
 The inspect must print `linux/amd64`. The Maven stage runs under emulation, so
@@ -62,8 +62,8 @@ Your local development stack is unaffected. It runs the image that
 ## 2. Copy the image to the NAS
 
 ```bash
-docker save dopamenu:0.1.6 | gzip > /tmp/dopamenu-0.1.6-amd64.tar.gz
-ls -lh /tmp/dopamenu-0.1.6-amd64.tar.gz    # roughly 150 to 200 MB
+docker save dopamenu:0.2.0 | gzip > /tmp/dopamenu-0.2.0-amd64.tar.gz
+ls -lh /tmp/dopamenu-0.2.0-amd64.tar.gz    # roughly 150 to 200 MB
 
 ssh -i ~/.ssh/id_rsa_synology dogeared@192.168.68.112 \
   'mkdir -p /volume1/docker/dopamenu'
@@ -72,7 +72,7 @@ ssh -i ~/.ssh/id_rsa_synology dogeared@192.168.68.112 \
 Then transfer it. Use the `-O` flag because the SFTP subsystem is off:
 
 ```bash
-scp -O -i ~/.ssh/id_rsa_synology /tmp/dopamenu-0.1.6-amd64.tar.gz \
+scp -O -i ~/.ssh/id_rsa_synology /tmp/dopamenu-0.2.0-amd64.tar.gz \
   dogeared@192.168.68.112:/volume1/docker/dopamenu/
 ```
 
@@ -80,18 +80,18 @@ If `-O` also fails, pipe the file over plain SSH, which needs no SFTP at all:
 
 ```bash
 ssh -i ~/.ssh/id_rsa_synology dogeared@192.168.68.112 \
-  'cat > /volume1/docker/dopamenu/dopamenu-0.1.6-amd64.tar.gz' \
-  < /tmp/dopamenu-0.1.6-amd64.tar.gz
+  'cat > /volume1/docker/dopamenu/dopamenu-0.2.0-amd64.tar.gz' \
+  < /tmp/dopamenu-0.2.0-amd64.tar.gz
 ```
 
 Check the transfer before loading, because a truncated tarball fails later with
 an unrelated-looking error:
 
 ```bash
-shasum -a 256 /tmp/dopamenu-0.1.6-amd64.tar.gz
+shasum -a 256 /tmp/dopamenu-0.2.0-amd64.tar.gz
 
 ssh -i ~/.ssh/id_rsa_synology dogeared@192.168.68.112 \
-  'sha256sum /volume1/docker/dopamenu/dopamenu-0.1.6-amd64.tar.gz'
+  'sha256sum /volume1/docker/dopamenu/dopamenu-0.2.0-amd64.tar.gz'
 ```
 
 The two hashes must match.
@@ -100,14 +100,14 @@ The two hashes must match.
 
 ```bash
 ssh -t -i ~/.ssh/id_rsa_synology dogeared@192.168.68.112 \
-  'sudo /usr/local/bin/docker load -i /volume1/docker/dopamenu/dopamenu-0.1.6-amd64.tar.gz'
+  'sudo /usr/local/bin/docker load -i /volume1/docker/dopamenu/dopamenu-0.2.0-amd64.tar.gz'
 ```
 
 Verify the image and the shared network in one pass:
 
 ```bash
 ssh -t -i ~/.ssh/id_rsa_synology dogeared@192.168.68.112 \
-  'sudo /usr/local/bin/docker image inspect dopamenu:0.1.6 --format "{{.Os}}/{{.Architecture}}"
+  'sudo /usr/local/bin/docker image inspect dopamenu:0.2.0 --format "{{.Os}}/{{.Architecture}}"
    sudo /usr/local/bin/docker network ls | grep nas-shared'
 ```
 
@@ -227,7 +227,7 @@ services:
       retries: 30
 
   app:
-    image: dopamenu:0.1.6
+    image: dopamenu:0.2.0
     container_name: dopamenu-app
     restart: unless-stopped
     depends_on:
@@ -291,7 +291,7 @@ In DSM, open **Container Manager**, then **Project**, then **Create**.
 | Path | `/volume1/docker/dopamenu` |
 | Source | Use the existing compose file |
 
-Container Manager runs `docker compose up -d`. Because `dopamenu:0.1.6` is
+Container Manager runs `docker compose up -d`. Because `dopamenu:0.2.0` is
 already in the local image store it does not pull anything. If it reports a pull
 failure, the tag is missing and step 3 did not finish.
 
@@ -363,10 +363,10 @@ like a broken registration form.
 ## 10. Clean up
 
 ```bash
-rm /tmp/dopamenu-0.1.6-amd64.tar.gz
+rm /tmp/dopamenu-0.2.0-amd64.tar.gz
 
 ssh -t -i ~/.ssh/id_rsa_synology dogeared@192.168.68.112 \
-  'rm /volume1/docker/dopamenu/dopamenu-0.1.6-amd64.tar.gz /tmp/dopamenu-realm.json'
+  'rm /volume1/docker/dopamenu/dopamenu-0.2.0-amd64.tar.gz /tmp/dopamenu-realm.json'
 ```
 
 Keep the loaded image until the deploy has been up for a day. It is the rollback
@@ -379,18 +379,24 @@ one-line edit, and a restart.
 
 ```bash
 # on the Mac
-docker buildx build --platform linux/amd64 --load -t dopamenu:0.1.7 .
-docker save dopamenu:0.1.7 | gzip > /tmp/dopamenu-0.1.7-amd64.tar.gz
-scp -O -i ~/.ssh/id_rsa_synology /tmp/dopamenu-0.1.7-amd64.tar.gz \
+docker buildx build --platform linux/amd64 --load -t dopamenu:0.2.1 .
+docker save dopamenu:0.2.1 | gzip > /tmp/dopamenu-0.2.1-amd64.tar.gz
+scp -O -i ~/.ssh/id_rsa_synology /tmp/dopamenu-0.2.1-amd64.tar.gz \
   dogeared@192.168.68.112:/volume1/docker/dopamenu/
 
 # on the NAS
 sudo -i
 cd /volume1/docker/dopamenu
-docker load -i dopamenu-0.1.7-amd64.tar.gz
-sed -i 's|image: dopamenu:0.1.6|image: dopamenu:0.1.7|' compose.yaml
+docker load -i dopamenu-0.2.1-amd64.tar.gz
+sed -i 's|image: dopamenu:0.2.0|image: dopamenu:0.2.1|' compose.yaml
 docker compose up -d app
 ```
+
+Flyway runs at startup, so `up -d app` also applies any new migrations. 0.2.0
+adds `V5__manual_order_duration.sql`, which only adds a nullable column and a
+defaulted boolean to `menu_order`. That makes the first boot after the upgrade
+take a moment, and lets the 0.2.0 image roll back to 0.1.6 without a schema
+change, since the older mapping ignores the extra columns.
 
 To roll back, point the tag at the previous image, which is still loaded, and
 restart the same way.

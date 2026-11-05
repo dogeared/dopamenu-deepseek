@@ -988,8 +988,15 @@ vaadin-app-layout::part(content) {
 
 .card-footer {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 10px;
   padding-top: 2px;
+}
+
+.card-log {
+  margin-right: auto;
+  font-size: 12px;
 }
 
 .card-action {
@@ -1283,6 +1290,11 @@ vaadin-app-layout::part(content) {
 .status-active {
   background: #faead9;
   color: #a85813;
+}
+
+.status-retroactive {
+  background: rgba(33, 29, 23, 0.06);
+  color: var(--dm-muted);
 }
 
 .order-meta {

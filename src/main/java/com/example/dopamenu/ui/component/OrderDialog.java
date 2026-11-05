@@ -17,6 +17,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.shared.Registration;
 
@@ -25,8 +26,9 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * The order flow: check in, run the timer, check out. The timer is a plain
- * server-side countdown driven by Vaadin polling — no JavaScript involved.
+ * The order flow: check in, run the timer, check out with a chance to correct
+ * the minutes. The timer is a plain server-side countdown driven by Vaadin
+ * polling — no JavaScript involved.
  */
 public class OrderDialog extends Dialog {
 
@@ -218,11 +220,20 @@ public class OrderDialog extends Dialog {
         eyebrow.addClassName("eyebrow");
         H2 heading = new H2("How did that land?");
         heading.addClassName("dialog-title");
-        Span spent = new Span("You gave it " + UiText.minutes(order.minutesElapsed())
+        Span spent = new Span("The clock says " + UiText.minutes(order.minutesElapsed())
                 + ". Before: " + UiText.mood(order.getMoodBefore()) + ".");
         spent.addClassName("dialog-subtitle");
         head.add(eyebrow, heading, spent);
         shell.add(head);
+
+        IntegerField minutesSpent = new IntegerField("Minutes spent");
+        minutesSpent.setMin(1);
+        minutesSpent.setMax(600);
+        minutesSpent.setStepButtonsVisible(true);
+        minutesSpent.setValue((int) Math.max(1, order.minutesElapsed()));
+        minutesSpent.setHelperText("Adjust it if the clock isn't the whole story.");
+        minutesSpent.addClassName("field-full");
+        shell.add(minutesSpent);
 
         MoodPicker mood = new MoodPicker("How do you feel now?",
                 order.getMoodBefore() != null ? order.getMoodBefore() : 3);
@@ -244,8 +255,15 @@ public class OrderDialog extends Dialog {
         log.add(new Span("Log it"));
         log.add(VaadinIcon.CHECK.create());
         log.addClickListener(event -> {
+            Integer value = minutesSpent.getValue();
+            if (value == null || value < 1) {
+                minutesSpent.setInvalid(true);
+                minutesSpent.setErrorMessage("At least one minute");
+                return;
+            }
+            minutesSpent.setInvalid(false);
             orderService.complete(currentUser.id(), order.getId(), mood.getValue(),
-                    note.getValue());
+                    note.getValue(), value);
             Notification.show("Logged. Nice work.");
             onChanged.run();
             close();

@@ -5,6 +5,23 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-11-05
+
+### Added
+
+- **Ordering now follows the dish's timer setting.** Without **Pair with a
+  timer**, **Order** opens a short form for the minutes you actually spent,
+  with the before/after moods and an optional note, and writes the entry
+  straight to History without starting a countdown. With the timer paired,
+  **Order** starts the countdown as before.
+- **Correct the clock when you finish.** The completion screen of a timed order
+  now has an editable **Minutes spent** field, prefilled from the timer, so an
+  interruption or a longer session is recorded as it really was.
+- Timer dishes still offer **Log it** for something you already finished. That
+  writes a completed entry without touching a running timer.
+- Entries logged without a timer carry a **Logged** pill in History and show
+  the reported minutes, so they read differently from timed orders.
+
 ## [0.1.6] - 2026-11-05
 
 ### Added

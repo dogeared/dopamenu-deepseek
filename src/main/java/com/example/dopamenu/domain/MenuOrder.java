@@ -54,6 +54,20 @@ public class MenuOrder {
     @Column(name = "ended_at")
     private Instant endedAt;
 
+    /**
+     * The minutes the user reported when logging an order that already
+     * happened. Null for orders that ran on the timer.
+     */
+    @Column(name = "actual_minutes")
+    private Integer actualMinutes;
+
+    /**
+     * True when the order was recorded after the fact rather than started and
+     * timed in the app.
+     */
+    @Column(nullable = false)
+    private boolean retroactive;
+
     @Column(name = "mood_before")
     private Integer moodBefore;
 
@@ -122,6 +136,14 @@ public class MenuOrder {
         return endedAt;
     }
 
+    public Integer getActualMinutes() {
+        return actualMinutes;
+    }
+
+    public boolean isRetroactive() {
+        return retroactive;
+    }
+
     public Integer getMoodBefore() {
         return moodBefore;
     }
@@ -139,7 +161,35 @@ public class MenuOrder {
     }
 
     public void complete(int moodAfter, String note) {
+        complete(moodAfter, note, null);
+    }
+
+    /**
+     * @param actualMinutes the minutes the user corrected after the timer ran,
+     *                      or null to keep the clock's own measurement.
+     */
+    public void complete(int moodAfter, String note, Integer actualMinutes) {
+        if (actualMinutes != null && actualMinutes < 1) {
+            throw new IllegalArgumentException("Minutes must be at least one");
+        }
         this.status = OrderStatus.COMPLETED;
+        this.endedAt = Instant.now();
+        this.actualMinutes = actualMinutes;
+        this.moodAfter = moodAfter;
+        this.note = note;
+    }
+
+    /**
+     * Records an order that already happened. The timer never ran, so the
+     * user's reported minutes stand in for the elapsed time.
+     */
+    public void logPast(int minutes, int moodAfter, String note) {
+        if (minutes < 1) {
+            throw new IllegalArgumentException("Minutes must be at least one");
+        }
+        this.status = OrderStatus.COMPLETED;
+        this.retroactive = true;
+        this.actualMinutes = minutes;
         this.endedAt = Instant.now();
         this.moodAfter = moodAfter;
         this.note = note;
@@ -151,6 +201,9 @@ public class MenuOrder {
     }
 
     public long minutesElapsed() {
+        if (actualMinutes != null) {
+            return actualMinutes;
+        }
         Instant end = endedAt != null ? endedAt : Instant.now();
         return Math.max(0, Duration.between(startedAt, end).toMinutes());
     }

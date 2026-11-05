@@ -167,6 +167,27 @@ class MenuOrderServiceTest {
     }
 
     @Test
+    void completeKeepsTheDurationTheUserCorrected() {
+        MenuOrder order = new MenuOrder("user-1", item(), 2);
+        UUID orderId = UUID.randomUUID();
+        when(orderRepository.findByIdAndOwnerSub(orderId, "user-1"))
+                .thenReturn(Optional.of(order));
+
+        MenuOrder completed = service.complete("user-1", orderId, 5, null, 52);
+
+        assertThat(completed.getActualMinutes()).isEqualTo(52);
+        assertThat(completed.minutesElapsed()).isEqualTo(52);
+    }
+
+    @Test
+    void completeRejectsACorrectedDurationBelowOneMinute() {
+        assertThatThrownBy(() -> service.complete("user-1", UUID.randomUUID(), 5, null, 0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Minutes must be at least one");
+        verify(orderRepository, never()).findByIdAndOwnerSub(any(), any());
+    }
+
+    @Test
     void completeLeavesAlreadyFinishedOrdersUntouched() {
         MenuOrder order = new MenuOrder("user-1", item(), 2);
         order.complete(4, "first");
@@ -230,6 +251,77 @@ class MenuOrderServiceTest {
                 .thenReturn(List.of(order));
 
         assertThat(service.recentOrders("user-1")).containsExactly(order);
+    }
+
+    @Test
+    void logPastCreatesACompletedOrderWithTheReportedMinutes() {
+        UUID itemId = UUID.randomUUID();
+        MenuItem item = new MenuItem("user-1", Course.ENTREE, "A long walk", null,
+                45, DopamineLevel.BRIGHT, false, "share-token");
+        when(itemRepository.findByIdAndOwnerSub(itemId, "user-1"))
+                .thenReturn(Optional.of(item));
+        when(orderRepository.save(any(MenuOrder.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        MenuOrder order = service.logPast("user-1", itemId, 40, 2, 5, "  worth it  ");
+
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.COMPLETED);
+        assertThat(order.isRetroactive()).isTrue();
+        assertThat(order.getActualMinutes()).isEqualTo(40);
+        assertThat(order.minutesElapsed()).isEqualTo(40);
+        assertThat(order.getMoodBefore()).isEqualTo(2);
+        assertThat(order.getMoodAfter()).isEqualTo(5);
+        assertThat(order.getNote()).isEqualTo("worth it");
+        verify(orderRepository).save(order);
+        verify(events).record(MenuEvent.Kind.ORDER_COMPLETED, "user-1", "share-token", null,
+                null);
+    }
+
+    @Test
+    void logPastStoresNullForABlankNote() {
+        UUID itemId = UUID.randomUUID();
+        when(itemRepository.findByIdAndOwnerSub(itemId, "user-1"))
+                .thenReturn(Optional.of(item()));
+        when(orderRepository.save(any(MenuOrder.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        MenuOrder order = service.logPast("user-1", itemId, 10, 3, 4, "   ");
+
+        assertThat(order.getNote()).isNull();
+    }
+
+    @Test
+    void logPastDoesNotDisturbARunningTimer() {
+        UUID itemId = UUID.randomUUID();
+        when(itemRepository.findByIdAndOwnerSub(itemId, "user-1"))
+                .thenReturn(Optional.of(item()));
+        when(orderRepository.save(any(MenuOrder.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.logPast("user-1", itemId, 20, 3, 4, null);
+
+        verify(orderRepository, never()).findFirstByOwnerSubAndStatusOrderByStartedAtDesc(
+                any(), any());
+    }
+
+    @Test
+    void logPastRejectsAMissingItem() {
+        when(itemRepository.findByIdAndOwnerSub(any(), eq("user-1")))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.logPast("user-1", UUID.randomUUID(), 10, 3, 4, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Menu item not found");
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    void logPastRejectsZeroMinutes() {
+        assertThatThrownBy(() -> service.logPast("user-1", UUID.randomUUID(), 0, 3, 4, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Minutes must be at least one");
+        verify(itemRepository, never()).findByIdAndOwnerSub(any(), any());
+        verify(orderRepository, never()).save(any());
     }
 
     @Test
