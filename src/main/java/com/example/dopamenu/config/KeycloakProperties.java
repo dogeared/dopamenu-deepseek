@@ -30,6 +30,15 @@ public record KeycloakProperties(
     }
 
     /**
+     * Keycloak's registration endpoint. Hitting it renders the sign-up form
+     * directly instead of the login form, while still honouring PKCE, state and
+     * nonce, so the authorization code exchange completes normally.
+     */
+    public String registrationsUri() {
+        return issuer() + "/protocol/openid-connect/registrations";
+    }
+
+    /**
      * Browser-facing endpoint that ends the Keycloak SSO session. Spring uses
      * this metadata entry for RP-initiated logout.
      */

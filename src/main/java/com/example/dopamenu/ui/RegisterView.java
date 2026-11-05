@@ -9,10 +9,10 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 /**
- * Friendly {@code /register} entry point. It forwards to the same OAuth2
- * authorization endpoint as {@code /login}, with the parameter
- * {@link com.example.dopamenu.config.SignupResolver} turns into Keycloak's
- * {@code kc_action=register}.
+ * Friendly {@code /register} entry point. It forwards to the OAuth2
+ * authorization endpoint with the parameter
+ * {@link com.example.dopamenu.config.RegistrationResolver} turns into a request
+ * for Keycloak's registration endpoint, so the sign-up form opens directly.
  */
 @Route("register")
 @PageTitle("Create account")

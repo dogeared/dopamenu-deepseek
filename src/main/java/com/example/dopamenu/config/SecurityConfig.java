@@ -17,7 +17,8 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http,
-            ClientRegistrationRepository clientRegistrations) throws Exception {
+            ClientRegistrationRepository clientRegistrations,
+            KeycloakProperties keycloakProperties) throws Exception {
         // Health checks, the public share page and static assets must stay
         // reachable without a session. Vaadin serves this app's stylesheet and
         // favicon from the classpath, and the browser requests them
@@ -29,10 +30,12 @@ public class SecurityConfig {
                 .permitAll());
 
         // The /register shim asks for registration by adding action=register;
-        // the wrapper turns only that request into kc_action=register.
-        OAuth2AuthorizationRequestResolver authorizationRequests = new SignupResolver(
+        // the wrapper sends only that request to Keycloak's registration
+        // endpoint instead of its login endpoint.
+        OAuth2AuthorizationRequestResolver authorizationRequests = new RegistrationResolver(
                 new DefaultOAuth2AuthorizationRequestResolver(clientRegistrations,
-                        "/oauth2/authorization"));
+                        "/oauth2/authorization"),
+                keycloakProperties.registrationsUri());
         http.oauth2Login(login -> login.authorizationEndpoint(endpoint ->
                 endpoint.authorizationRequestResolver(authorizationRequests)));
 

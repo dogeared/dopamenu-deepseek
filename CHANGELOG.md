@@ -5,6 +5,22 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.6] - 2026-11-05
+
+### Added
+
+- A **Sign out** pill in the header, beside the signed-in user's name, on every
+  signed-in page. The menu and history pages had the control only at the bottom
+  of the drawer, while the public site already showed it next to the name.
+
+### Fixed
+
+- **Create account** now opens the registration form directly. Both entry points
+  (the landing-page hero and the public nav) still link to `/register`, but that
+  route now targets Keycloak's `protocol/openid-connect/registrations` endpoint.
+  The previous `kc_action=register` hint is ignored by Keycloak 26, so the
+  button landed on the login form and left the user to find the Register link.
+
 ## [0.1.5] - 2026-11-04
 
 ### Added
