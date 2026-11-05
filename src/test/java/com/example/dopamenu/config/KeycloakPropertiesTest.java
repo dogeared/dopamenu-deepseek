@@ -20,6 +20,8 @@ class KeycloakPropertiesTest {
         assertThat(properties.issuer()).isEqualTo("http://localhost:8180/realms/dopamenu");
         assertThat(properties.authorizationUri())
                 .isEqualTo("http://localhost:8180/realms/dopamenu/protocol/openid-connect/auth");
+        assertThat(properties.registrationsUri())
+                .isEqualTo("http://localhost:8180/realms/dopamenu/protocol/openid-connect/registrations");
         assertThat(properties.endSessionEndpoint())
                 .isEqualTo("http://localhost:8180/realms/dopamenu/protocol/openid-connect/logout");
         assertThat(properties.tokenUri())

@@ -32,7 +32,7 @@ public class MainLayout extends AppLayout {
         header.add(drawerToggle, brand(), desktopNav());
         Div spacer = new Div();
         spacer.addClassName("header-spacer");
-        header.add(spacer, userChip(currentUser));
+        header.add(spacer, account(currentUser, authenticationContext));
         addToNavbar(header);
 
         addToDrawer(drawer(authenticationContext));
@@ -60,6 +60,19 @@ public class MainLayout extends AppLayout {
                 link("History", VaadinIcon.CHART, HistoryView.class, "nav-link"),
                 link("Edit menu", VaadinIcon.EDIT, ManageMenuView.class, "nav-link"));
         return nav;
+    }
+
+    private static Div account(CurrentUser currentUser,
+            AuthenticationContext authenticationContext) {
+        Div account = new Div();
+        account.addClassName("nav-account");
+
+        NativeButton signOut = new NativeButton("Sign out");
+        Css.add(signOut, "btn", "btn-ghost", "nav-signout");
+        signOut.addClickListener(event -> authenticationContext.logout());
+
+        account.add(userChip(currentUser), signOut);
+        return account;
     }
 
     private static Div userChip(CurrentUser currentUser) {

@@ -4,24 +4,28 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 /**
- * Adds Keycloak's {@code kc_action=register} parameter when the sign-in request
- * asked for registration. Every other authorization request is returned
- * untouched, so PKCE, state and the normal login path are unchanged.
+ * Sends the sign-in request to Keycloak's registration endpoint when the user
+ * asked to create an account. Every other authorization request is returned
+ * untouched, so PKCE, state, nonce and the normal login path are unchanged.
+ *
+ * <p>Keycloak ignores {@code kc_action=register} on its authorization endpoint,
+ * which is why the request targets {@code /protocol/openid-connect/registrations}
+ * instead. That endpoint renders the sign-up form directly and keeps the PKCE
+ * challenge, so the code exchange still completes through the public client.</p>
  */
-public class SignupResolver implements OAuth2AuthorizationRequestResolver {
+public class RegistrationResolver implements OAuth2AuthorizationRequestResolver {
 
     static final String ACTION_PARAMETER = "action";
     static final String REGISTER_ACTION = "register";
-    static final String KC_ACTION_PARAMETER = "kc_action";
 
     private final OAuth2AuthorizationRequestResolver delegate;
+    private final String registrationUri;
 
-    public SignupResolver(OAuth2AuthorizationRequestResolver delegate) {
+    public RegistrationResolver(OAuth2AuthorizationRequestResolver delegate,
+            String registrationUri) {
         this.delegate = delegate;
+        this.registrationUri = registrationUri;
     }
 
     @Override
@@ -35,16 +39,14 @@ public class SignupResolver implements OAuth2AuthorizationRequestResolver {
         return customize(delegate.resolve(request, registrationId), request);
     }
 
-    private static OAuth2AuthorizationRequest customize(OAuth2AuthorizationRequest request,
+    private OAuth2AuthorizationRequest customize(OAuth2AuthorizationRequest request,
             HttpServletRequest httpRequest) {
         if (request == null
                 || !REGISTER_ACTION.equals(httpRequest.getParameter(ACTION_PARAMETER))) {
             return request;
         }
-        Map<String, Object> parameters = new LinkedHashMap<>(request.getAdditionalParameters());
-        parameters.put(KC_ACTION_PARAMETER, REGISTER_ACTION);
         return OAuth2AuthorizationRequest.from(request)
-                .additionalParameters(parameters)
+                .authorizationUri(registrationUri)
                 .build();
     }
 }

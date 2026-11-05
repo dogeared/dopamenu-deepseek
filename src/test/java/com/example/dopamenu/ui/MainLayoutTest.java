@@ -1,14 +1,19 @@
 package com.example.dopamenu.ui;
 
 import com.example.dopamenu.service.CurrentUser;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static com.example.dopamenu.ui.UiTestSupport.button;
+import java.util.List;
+
 import static com.example.dopamenu.ui.UiTestSupport.buttonByAriaLabel;
 import static com.example.dopamenu.ui.UiTestSupport.click;
+import static com.example.dopamenu.ui.UiTestSupport.findAll;
 import static com.example.dopamenu.ui.UiTestSupport.hasText;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -49,7 +54,24 @@ class MainLayoutTest {
         assertThat(hasText(layout, "AL")).isTrue();
         assertThat(hasText(layout, "Your menu")).isTrue();
         assertThat(hasText(layout, "Take what you need. Leave the rest.")).isTrue();
-        assertThat(hasText(layout, "Sign out")).isTrue();
+        assertThat(signOutButtons(layout)).hasSize(2);
+    }
+
+    @Test
+    void theHeaderCarriesSignOutNextToTheUserName() {
+        MainLayout layout = new MainLayout(currentUser, authenticationContext);
+
+        Div account = findAll(layout, Div.class).stream()
+                .filter(div -> div.getClassNames().contains("nav-account"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("No header account block"));
+
+        assertThat(hasText(account, "Ada Lovelace")).isTrue();
+        assertThat(account.getChildren()
+                .filter(NativeButton.class::isInstance)
+                .map(Component::getElement)
+                .map(element -> element.getTextRecursively().trim()))
+                .containsExactly("Sign out");
     }
 
     @Test
@@ -65,11 +87,18 @@ class MainLayoutTest {
     }
 
     @Test
-    void signingOutDelegatesToTheAuthenticationContext() {
+    void signingOutFromTheHeaderDelegatesToTheAuthenticationContext() {
         MainLayout layout = new MainLayout(currentUser, authenticationContext);
 
-        click(button(layout, "Sign out"));
+        click(signOutButtons(layout).getFirst());
 
         verify(authenticationContext).logout();
+    }
+
+    private static List<NativeButton> signOutButtons(MainLayout layout) {
+        return findAll(layout, NativeButton.class).stream()
+                .filter(button -> "Sign out".equals(
+                        button.getElement().getTextRecursively().trim()))
+                .toList();
     }
 }
