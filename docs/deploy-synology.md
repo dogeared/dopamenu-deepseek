@@ -296,9 +296,9 @@ already in the local image store it does not pull anything. If it reports a pull
 failure, the tag is missing and step 3 did not finish.
 
 Some Container Manager versions only detect a file named `docker-compose.yml`
-when you choose the existing-file option. Keep `compose.yaml`, because
-`nas-deploy.sh` looks for that name, and add a link if the picker does not see
-it:
+when you choose the existing-file option. Keep `compose.yaml`, because the
+deploy agent runs `docker compose` in this directory, and add a link if the
+picker does not see it:
 
 ```bash
 cd /volume1/docker/dopamenu
@@ -401,10 +401,11 @@ change, since the older mapping ignores the extra columns.
 To roll back, point the tag at the previous image, which is still loaded, and
 restart the same way.
 
-When the pipeline lands, this whole runbook collapses. The image becomes
-`ghcr.io/dogeared/dopamenu:latest`, and `deploy/nas-deploy.sh` in
-`dogeared-central-infra` pulls it on its timer once `dopamenu` is added to its
-`PROJECTS` list.
+The pipeline has replaced the manual runbook above. The image is
+`ghcr.io/dogeared/dopamenu-deepseek:latest`; CI publishes it on every merge to
+`main` and then calls the NAS deploy agent, which pulls it and runs `up -d`.
+There is no timer or other polling path — see `deploy/README.md` in
+`dogeared-central-infra`.
 
 ## Troubleshooting
 
