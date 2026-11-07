@@ -261,6 +261,13 @@ In Realm settings, open General:
   hostname as `iss`.
 - Require SSL `external`.
 
+In Realm settings, open Sessions:
+
+- SSO Session Idle **30 days** and SSO Session Max **30 days**. Signed-in users
+  stay signed in for up to 30 days; the app's servlet session uses the same
+  limit (`server.servlet.session.timeout: 30d`), so the Keycloak refresh token
+  must outlive it.
+
 In Realm settings, open Login:
 
 - User registration **on**. The app's "Create account" call to action and the

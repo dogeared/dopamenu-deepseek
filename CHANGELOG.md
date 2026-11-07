@@ -5,6 +5,14 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-11-06
+
+### Changed
+
+- **Stay signed in for 30 days.** Once you authenticate, the app session and
+  the Keycloak SSO session now stay alive for up to 30 days instead of expiring
+  after 30 minutes idle, so you do not have to sign in again on every visit.
+
 ## [0.2.0] - 2026-11-05
 
 ### Added
