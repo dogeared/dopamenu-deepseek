@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-11-06
+
+### Added
+
+- **Version in the footer.** Every page footer now shows the running application
+  version (for example `v0.3.1`), read from the build metadata.
+
 ## [0.3.0] - 2026-11-06
 
 ### Changed

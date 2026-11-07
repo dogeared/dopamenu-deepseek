@@ -1503,7 +1503,15 @@ vaadin-app-layout::part(content) {
 .site-footer {
   display: flex;
   flex-wrap: wrap;
+  align-items: baseline;
   gap: 4px;
+}
+
+.site-footer-version {
+  margin-left: auto;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
 }
 
 /* ----------------------------------------------------------------- dialogs */

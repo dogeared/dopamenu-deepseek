@@ -12,12 +12,18 @@ public class SiteFooter extends Footer {
     public static final String GITHUB_URL = "https://github.com/dogeared/dopamenu-deepseek";
 
     public SiteFooter() {
+        this(AppVersion.current());
+    }
+
+    SiteFooter(String version) {
         addClassName("view-footer");
         addClassName("site-footer");
         Span text = new Span("made with ❤️ by ");
         Anchor author = new Anchor(GITHUB_URL, "dogeared");
         author.setTarget("_blank");
         author.addClassName("inline-link");
-        add(text, author);
+        Span versionLabel = new Span("v" + version);
+        versionLabel.addClassName("site-footer-version");
+        add(text, author, versionLabel);
     }
 }
