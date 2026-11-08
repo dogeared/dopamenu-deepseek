@@ -222,6 +222,10 @@ services:
 
 - Flyway runs the migrations on boot and JPA runs in `validate` mode, so a schema
   that does not match the migrations stops the container instead of drifting.
+- Authenticated sessions live in Postgres (`spring_session` tables created by
+  migration `V6`) with Spring Session JDBC, and the session cookie is persistent
+  for 30 days. Deploys recreate the container without signing users out, so the
+  database is now part of the session store and must be available on every boot.
 - `KEYCLOAK_PUBLIC_URL` is the browser-facing base URL **and** the issuer the app
   expects in every ID token. `KEYCLOAK_INTERNAL_URL` is the container-to-container
   URL used for token exchange and JWKS; it does not have to match.

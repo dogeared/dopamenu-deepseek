@@ -5,6 +5,15 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-11-08
+
+### Changed
+
+- **Stay signed in across browser restarts and deploys.** The session cookie is
+  now persistent for 30 days, and authenticated sessions are stored in Postgres
+  with Spring Session JDBC instead of in the app container's memory. A deploy
+  that recreates the app container no longer signs everyone out.
+
 ## [0.3.1] - 2026-11-06
 
 ### Added

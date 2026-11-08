@@ -2,8 +2,11 @@ package com.example.dopamenu.config;
 
 import com.example.dopamenu.ui.ShareRoutes;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.session.SessionRepository;
+import org.springframework.session.jdbc.JdbcIndexedSessionRepository;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
@@ -42,6 +45,9 @@ class PublicRouteHttpTest {
     @LocalServerPort
     private int port;
 
+    @Autowired
+    private SessionRepository<?> sessionRepository;
+
     private final HttpClient client = HttpClient.newBuilder()
             .followRedirects(HttpClient.Redirect.NEVER)
             .connectTimeout(Duration.ofSeconds(10))
@@ -69,5 +75,20 @@ class PublicRouteHttpTest {
         HttpResponse<String> response = get("/menu");
 
         assertThat(response.statusCode()).isBetween(300, 399);
+    }
+
+    @Test
+    void sessionsAreStoredInPostgresAndKeepTheirCookieForThirtyDays()
+            throws Exception {
+        assertThat(sessionRepository)
+                .isInstanceOf(JdbcIndexedSessionRepository.class);
+
+        HttpResponse<String> response = get("/menu");
+        String cookies = String.join("; ",
+                response.headers().allValues("set-cookie"));
+
+        assertThat(cookies).contains("SESSION=");
+        assertThat(cookies).contains("Max-Age=2592000");
+        assertThat(cookies).contains("HttpOnly");
     }
 }

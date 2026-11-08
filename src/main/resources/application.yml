@@ -18,6 +18,10 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  session:
+    jdbc:
+      # Flyway owns the SPRING_SESSION tables.
+      initialize-schema: never
 
 app:
   keycloak:
@@ -34,6 +38,10 @@ server:
   servlet:
     session:
       timeout: 30d
+      cookie:
+        # Keep the session cookie after the browser closes; without this the
+        # browser drops it and the server-side 30-day session is unreachable.
+        max-age: 30d
 
 vaadin:
   # Set to true locally if you want the browser to open automatically.
