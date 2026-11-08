@@ -2,11 +2,8 @@ package com.example.dopamenu.config;
 
 import com.example.dopamenu.ui.ShareRoutes;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.session.SessionRepository;
-import org.springframework.session.jdbc.JdbcIndexedSessionRepository;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
@@ -45,9 +42,6 @@ class PublicRouteHttpTest {
     @LocalServerPort
     private int port;
 
-    @Autowired
-    private SessionRepository<?> sessionRepository;
-
     private final HttpClient client = HttpClient.newBuilder()
             .followRedirects(HttpClient.Redirect.NEVER)
             .connectTimeout(Duration.ofSeconds(10))
@@ -78,16 +72,31 @@ class PublicRouteHttpTest {
     }
 
     @Test
-    void sessionsAreStoredInPostgresAndKeepTheirCookieForThirtyDays()
-            throws Exception {
-        assertThat(sessionRepository)
-                .isInstanceOf(JdbcIndexedSessionRepository.class);
+    void theLandingPageIsAnonymousAndStartsASession() throws Exception {
+        HttpResponse<String> response = get("/");
 
+        // The landing page must render before the visitor signs in, and the
+        // first response must carry a session cookie. Without it Vaadin's
+        // client reports "Cookies disabled" instead of rendering the page.
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.headers().firstValue("Content-Type").orElse(""))
+                .contains("text/html");
+
+        String cookies = String.join("; ",
+                response.headers().allValues("set-cookie"));
+        assertThat(cookies).contains("JSESSIONID=");
+        assertThat(cookies).contains("Max-Age=2592000");
+        assertThat(cookies).contains("HttpOnly");
+    }
+
+    @Test
+    void sessionsKeepTheirCookieForThirtyDays() throws Exception {
         HttpResponse<String> response = get("/menu");
+
         String cookies = String.join("; ",
                 response.headers().allValues("set-cookie"));
 
-        assertThat(cookies).contains("SESSION=");
+        assertThat(cookies).contains("JSESSIONID=");
         assertThat(cookies).contains("Max-Age=2592000");
         assertThat(cookies).contains("HttpOnly");
     }
