@@ -22,7 +22,8 @@ already runs. This file is the contract between the two repos.
 | Production realm export | `keycloak/realm-dopamenu.production.json` | Import directly into the central Keycloak |
 | Development realm export | `keycloak/realm-dopamenu.json` | Local only; contains the `demo` user and localhost URIs |
 | Login theme | `keycloak/themes/dopamenu/` | Mount into whichever Keycloak serves the realm |
-| Schema | `src/main/resources/db/migration/` | Flyway runs on boot; no manual step |
+| Schema | `src/main/resources/db/migration/` | Flyway runs on boot; no manual step. `V6` creates the Spring Session tables |
+| Session store | Postgres `spring_session` tables | Spring Session JDBC keeps 30-day sessions across container recreation |
 
 ## What central-infra must provide
 
