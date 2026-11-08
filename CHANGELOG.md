@@ -5,6 +5,16 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-11-08
+
+### Fixed
+
+- **The landing page works again.** Spring Session JDBC, added in 0.4.0, is not
+  compatible with Vaadin Flow: the session cookie was not sent on the first page
+  load and the Vaadin session was lost on the next request, so visitors saw
+  "Cookies disabled" or an endless reconnect. Sessions are back in the servlet
+  container, and the 30-day persistent session cookie is unchanged.
+
 ## [0.4.0] - 2026-11-08
 
 ### Changed
