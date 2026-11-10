@@ -5,6 +5,14 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2026-11-10
+
+### Changed
+
+- **ADHD reWired is now a link.** On the landing page, the "ADHD reWired" credit
+  for Eric Tivers links to [adhdrewired.com](https://www.adhdrewired.com), so the
+  thanks point somewhere useful.
+
 ## [0.4.1] - 2026-11-08
 
 ### Fixed

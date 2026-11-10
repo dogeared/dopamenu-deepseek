@@ -78,6 +78,13 @@ class LandingViewTest {
                 .orElseThrow();
         assertThat(eric.getHref()).isEqualTo(LandingView.ERIC_TIVERS_CHANNEL_URL);
         assertThat(eric.getTarget()).contains("_blank");
+
+        Anchor rewired = findAll(view, Anchor.class).stream()
+                .filter(anchor -> "ADHD reWired".equals(anchor.getText()))
+                .findFirst()
+                .orElseThrow();
+        assertThat(rewired.getHref()).isEqualTo(LandingView.ADHD_REWIRED_URL);
+        assertThat(rewired.getTarget()).contains("_blank");
     }
 
     @Test
