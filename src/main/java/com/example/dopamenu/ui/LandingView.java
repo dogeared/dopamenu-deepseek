@@ -32,6 +32,7 @@ public class LandingView extends VerticalLayout {
 
     public static final String ERIC_TIVERS_CHANNEL_URL =
             "https://www.youtube.com/@ADHDreWired";
+    public static final String ADHD_REWIRED_URL = "https://www.adhdrewired.com";
 
     public LandingView() {
         addClassName("landing-view");
@@ -161,8 +162,12 @@ public class LandingView extends VerticalLayout {
         eric.setTarget("_blank");
         eric.addClassName("inline-link");
         copy.add(eric);
-        copy.add(new Span(" of ADHD reWired, for the idea and for making it so "
-                + "understandable."));
+        copy.add(new Span(" of "));
+        Anchor rewired = new Anchor(ADHD_REWIRED_URL, "ADHD reWired");
+        rewired.setTarget("_blank");
+        rewired.addClassName("inline-link");
+        copy.add(rewired);
+        copy.add(new Span(", for the idea and for making it so understandable."));
 
         Anchor watch = new Anchor(ORIGINAL_VIDEO_URL, "Watch the original video");
         Css.add(watch, "btn", "btn-ghost");
