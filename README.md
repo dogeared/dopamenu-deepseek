@@ -3,6 +3,7 @@
 [![Version](https://img.shields.io/github/v/tag/dogeared/dopamenu-deepseek?label=version&sort=semver)](https://github.com/dogeared/dopamenu-deepseek/tags)
 [![Build](https://github.com/dogeared/dopamenu-deepseek/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/dogeared/dopamenu-deepseek/actions/workflows/ci.yml)
 [![Coverage](https://raw.githubusercontent.com/dogeared/dopamenu-deepseek/badges/jacoco.svg)](https://github.com/dogeared/dopamenu-deepseek/actions/workflows/ci.yml)
+[![Snyk](https://img.shields.io/github/actions/workflow/status/dogeared/dopamenu-deepseek/ci.yml?branch=main&label=snyk)](https://github.com/dogeared/dopamenu-deepseek/actions/workflows/ci.yml)
 
 A small, opinionated web app for building and using a **dopa-menu**: a menu of intentional
 dopamine sources organised into courses.
