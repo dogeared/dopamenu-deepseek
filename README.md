@@ -3,6 +3,7 @@
 [![Version](https://img.shields.io/github/v/tag/dogeared/dopamenu-deepseek?label=version&sort=semver)](https://github.com/dogeared/dopamenu-deepseek/tags)
 [![Build](https://github.com/dogeared/dopamenu-deepseek/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/dogeared/dopamenu-deepseek/actions/workflows/ci.yml)
 [![Coverage](https://raw.githubusercontent.com/dogeared/dopamenu-deepseek/badges/jacoco.svg)](https://github.com/dogeared/dopamenu-deepseek/actions/workflows/ci.yml)
+[![Snyk](https://img.shields.io/github/actions/workflow/status/dogeared/dopamenu-deepseek/ci.yml?branch=main&label=snyk)](https://github.com/dogeared/dopamenu-deepseek/actions/workflows/ci.yml)
 
 A small, opinionated web app for building and using a **dopa-menu**: a menu of intentional
 dopamine sources organised into courses.
@@ -20,8 +21,8 @@ Built with:
 | Layer | Technology |
 | --- | --- |
 | Runtime | Java 21 |
-| Backend | Spring Boot **4.1.1**, Spring Security 7 |
-| UI | Vaadin **25.3.2** (Flow, server-side Java) |
+| Backend | Spring Boot **4.1.3**, Spring Security 7 |
+| UI | Vaadin **25.3.5** (Flow, server-side Java) |
 | Auth | Keycloak (OIDC / OAuth 2.0) |
 | Database | PostgreSQL 17 + Flyway |
 | Packaging | Docker / Docker Compose |
@@ -397,6 +398,22 @@ components are all measured.
 
 The production build writes `target/dopamenu-0.2.0.jar`; the Dockerfile uses it in a
 multi-stage build.
+
+### Security scanning
+
+CI runs Snyk on every push and pull request: `snyk test` for dependencies (Snyk
+Open Source) and `snyk code test` for static analysis of the Java sources. Both
+fail on any high or critical finding, and the test job depends on them, so a
+vulnerable change cannot merge. The workflow needs the `SNYK_TOKEN` repository
+secret. To run the same scans locally, install the Snyk CLI and run:
+
+```bash
+snyk test --all-projects --severity-threshold=high
+snyk code test --severity-threshold=high
+```
+
+Known findings that have no published fix are recorded with an expiry in
+`.snyk`; remove each entry when the fixed version ships.
 
 ### Project layout
 

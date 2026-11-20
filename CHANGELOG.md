@@ -5,6 +5,21 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-11-20
+
+### Security
+
+- **Critical and high Snyk findings are fixed.** Spring Boot moves to 4.1.3,
+  Vaadin to 25.3.5, and Jackson is pinned to 3.1.8, which clears the critical
+  deserialization issue and the high-severity denial-of-service issues. The one
+  remaining high finding (an XXE path in the transitive `jaxb-core` used by
+  Hibernate) has no published fix; it is documented with an expiring ignore in
+  `.snyk` and re-checked when `jaxb` 4.0.10 ships.
+- **CI now fails on vulnerabilities.** Every push and pull request runs a Snyk
+  Open Source scan and a Snyk Code scan, and the test job waits for both. Any
+  open high or critical finding blocks the build. The workflow needs the
+  `SNYK_TOKEN` repository secret.
+
 ## [0.4.2] - 2026-11-10
 
 ### Changed
