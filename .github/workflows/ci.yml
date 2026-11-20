@@ -48,6 +48,17 @@ jobs:
       - name: Set up Snyk CLI
         uses: snyk/actions/setup@master
 
+      # Without the token the CLI fails with an opaque auth error, which looks
+      # like a scan failure. Fail with an actionable message instead.
+      - name: Require SNYK_TOKEN
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          if [ -z "$SNYK_TOKEN" ]; then
+            echo "::error::SNYK_TOKEN repository secret is not set"
+            exit 1
+          fi
+
       - name: Scan dependencies (Snyk Open Source)
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
