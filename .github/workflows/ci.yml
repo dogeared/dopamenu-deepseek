@@ -7,6 +7,9 @@ on:
       - "!badges"
   pull_request:
     types:
+      - opened
+      - synchronize
+      - reopened
       - closed
 
 permissions:
@@ -18,8 +21,46 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Fail the build on any high or critical finding, so a vulnerable dependency
+  # or a code issue cannot reach main unnoticed. Requires the SNYK_TOKEN
+  # repository secret. Findings that have no published fix are documented with
+  # a time-limited ignore in .snyk.
+  security:
+    name: Snyk security scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      # The CLI is installed on the runner rather than run through
+      # snyk/actions/maven because that action passes `command` as a single
+      # argument, so `command: code test` fails with "Unknown command".
+      - name: Set up Snyk CLI
+        uses: snyk/actions/setup@master
+
+      - name: Scan dependencies (Snyk Open Source)
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk test --all-projects --severity-threshold=high
+
+      - name: Scan code (Snyk Code)
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk code test --severity-threshold=high
+
   test:
     name: Test
+    needs: security
     if: github.event_name == 'push' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
